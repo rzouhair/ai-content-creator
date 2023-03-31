@@ -13,7 +13,7 @@ const MarkdownLi = (props: any) => {
 
   return (
     <li
-      className={`hover:bg-gray-100 duration-150 transition-colors cursor-pointer rounded-sm ${copied ? 'bg-green-100 hover:bg-green-200' : ''}`}
+      className={`hover:bg-gray-200 duration-150 transition-colors cursor-pointer rounded-sm ${copied ? 'bg-green-100 hover:bg-green-200' : ''}`}
       onClick={() => copy()}>
       {props.children}
     </li>

@@ -1,7 +1,9 @@
-import { ChatCompletionResponseMessage } from 'openai'
+import { ChatCompletionResponseMessage, CreateChatCompletionResponse, CreateCompletionResponseUsage } from 'openai'
 import React, { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+// @ts-ignore
+import { SSE } from 'sse.js'
 
 import { Button, TextInput } from '@tremor/react'
 
@@ -13,11 +15,15 @@ import AssistantMessage from '@/components/AssistantMessage'
 import GrowingTextArea from '@/components/GrowingTextArea'
 import MarkdownLi from '@/components/Markdown/MarkdownLi'
 import SystemPromptModal from '@/components/Modals/SystemPromptModal'
-import ChatSidebar from '@/components/Layouts/ChatSidebar'
+import ChatSidebar from '@/components/Chat/ChatSidebar'
 import { useAtom } from 'jotai'
 import ChatAssistantLoading from '@/components/Chat/ChatAssistantLoading'
+import LayoutMain from '@/components/Layouts/LayoutMain'
+import AppButton from '@/components/App/AppButton'
+import AppTextArea from '@/components/App/AppTextArea'
+import ChatHeader from '@/components/Chat/ChatHeader'
 
-export default function PostRecipePage() {
+function ChatPage() {
 
   const [currentChat] = useAtom(currentChatAtom)
   const [, setCurrentChat] = useAtom(setCurrentChatAtom)
@@ -54,16 +60,22 @@ export default function PostRecipePage() {
   }, [dummyMessage, currentChat])
   
 
-  const manageChatCreate = (messages: ChatCompletionResponseMessage[]) => {
+  const manageChatCreate = (messages: ChatCompletionResponseMessage[], usage?: CreateCompletionResponseUsage) => {
+    console.log({ currentUsage: currentChat?.usage, totalTokens: currentChat?.totalTokens, id: currentChat?.id })
     if (currentChat?.id) {
       updateChat(currentChat?.id, {
         ...currentChat,
+        totalTokens: usage?.total_tokens || currentChat.totalTokens,
+        usage: currentChat.usage?.concat([usage?.prompt_tokens, usage?.completion_tokens]) || [],
         messages,
       })
+      console.log(currentChat.messages[currentChat.messages.length - 1])
     } else {
       setNewChat({
         id: newChat.id,
         title: messages?.[1].content?.substring(0, 50),
+        totalTokens: usage?.total_tokens || 0,
+        usage: [usage?.prompt_tokens, usage?.completion_tokens] || [],
         messages: messages
       })
 
@@ -72,66 +84,158 @@ export default function PostRecipePage() {
     }
   }
 
+  const appendMessages = async (lengthErrorOccurred?: boolean) => {
+    const currentUserPrompt: ChatCompletionResponseMessage = {
+      role: 'user',
+      content: prompt
+    }
+    const mAppended: ChatCompletionResponseMessage[] = [
+      ...(currentChat?.messages || []),
+      currentUserPrompt,
+    ]
+    if (!currentChat?.messages?.find((c) => c.role === 'system')) {
+      mAppended.unshift({ role: 'system', content: defaultSystemPrompt })
+    }
+    const systemPrompt: any = currentChat?.messages?.find((c) => c.role === 'system')
+    setMessages(mAppended)
+
+    if (currentChat?.id) {
+      updateChat(currentChat?.id, {
+        ...currentChat,
+        messages: mAppended,
+      })
+    } else {
+      manageChatCreate([
+        ...mAppended,
+      ])
+    }
+    scrollDown()
+
+    const url = "https://api.openai.com/v1/chat/completions"
+    const data = {
+      model: 'gpt-3.5-turbo-0301',
+      messages: ((currentChat?.totalTokens && currentChat?.totalTokens >= 4096) || lengthErrorOccurred) ? mAppended.slice(-10).unshift(systemPrompt) : mAppended as any,
+      stream: true,
+    }
+    let source = new SSE(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPEN_API_KEY}`
+      },
+      method: 'POST',
+      payload: JSON.stringify(data)
+    })
+
+
+    let currentIndex: number | null = null
+    if (currentIndex === null) {
+      currentIndex = currentChat?.messages.length
+      const newMessage: ChatCompletionResponseMessage = { role: "assistant", content: "" }
+      manageChatCreate([
+        ...mAppended,
+        newMessage,
+      ])
+      scrollDown()
+      setTimeout(() => {
+        console.log({ length: currentChat?.messages.length })
+        source.stream()
+      }, 1000);
+    }
+    source.addEventListener("message", (e) => {
+      if (e.data === '[DONE]') {
+        console.log({ done: e })
+        currentIndex = null
+        return
+      } else {
+        if (currentIndex === null) {
+          console.log('NULL RETURN')
+          return
+        }
+        const payload = JSON.parse(e.data)
+        const text = payload.choices[0].delta?.content
+        if (text) {
+          // console.log(txt)
+          const lastMessage: any = currentChat?.messages[currentChat.messages.length]
+          console.log({ lastMessage })
+          if (lastMessage) {
+            try {
+              lastMessage.content += text
+            } catch {
+              console.log({ text, last: lastMessage?.content })
+            }
+            /* updateChat(currentChat?.id || '', {
+              ...currentChat,
+              messages: currentChat?.messages.slice(-1).push(lastMessage) as any,
+            }) */
+
+          }
+        }
+      }
+    })
+    /* const response = await openai.createChatCompletion({
+      model: 'gpt-3.5-turbo-0301',
+      messages: ((currentChat?.totalTokens && currentChat?.totalTokens >= 4096) || lengthErrorOccurred) ? mAppended.slice(-10).unshift(systemPrompt) : mAppended as any,
+      stream: true,
+    }, { responseType: 'stream' }) */
+
+
+    /* const newMessage = response.data.choices[0].message 
+    if (newMessage) {
+      manageChatCreate([
+        ...mAppended,
+        newMessage,
+      ], response.data.usage)
+      scrollDown()
+    } */
+  }
+
   const onGenerateTitleClicked = async() => {
     try {
       setLoadingAnswer(true)
       setPrompt('')
-      const mAppended: ChatCompletionResponseMessage[] = [
-        ...(currentChat?.messages || []),
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
-      if (!currentChat?.messages?.find((c) => c.role === 'system')) {
-        mAppended.unshift({ role: 'system', content: defaultSystemPrompt })
-      }
-      setMessages(mAppended)
-
-      if (currentChat?.id) {
-        updateChat(currentChat?.id, {
-          ...currentChat,
-          messages: mAppended,
-        })
+      await appendMessages()
+    } catch (error: any) {
+      const errorCode = error?.response?.data?.error?.code
+      if (errorCode === "context_length_exceeded") {
+        await appendMessages(true)
       } else {
-        manageChatCreate([
-          ...mAppended,
-        ])
+        console.error(error)
       }
-      scrollDown()
-      const response = await openai.createChatCompletion({
-        model: 'gpt-3.5-turbo-0301',
-        messages: mAppended,
-      })
+    } finally {
+      setLoadingAnswer(false)
+    }
+  }
 
-      const newMessage = response.data.choices[0].message 
-      if (newMessage) {
-        manageChatCreate([
-          ...mAppended,
-          newMessage,
-        ])
-        scrollDown()
-        /* if (!currentChat?.id) {
-          setNewChat()
-        }
-        console.log({ newChat })
-        setCurrentChat(newChat.id)
-        console.log({ currentChat })
-        setNewChat()
-        console.log({ newChatAfter: newChat }) */
+  const regeneateResponse = async() => {
+    try {
+      setLoadingAnswer(true)
+      scrollDown()
+      if (currentChat?.messages) {
+        const response = await openai.createChatCompletion({
+          model: 'gpt-3.5-turbo-0301',
+          messages: currentChat?.messages,
+        })
+        const newMessage = response.data.choices[0].message 
+
+        if (newMessage)
+          manageChatCreate([
+            ...currentChat.messages,
+            newMessage,
+          ], response.data.usage)
       }
     } catch (error) {
       console.error(error)
     } finally {
       setLoadingAnswer(false)
     }
+
   }
 
   const renderMessages = () => {
     return currentChat?.messages?.filter(message => message.role !== 'system').map((message, key) => message.role === 'user' ? (
       <UserMessage key={key}>
         <ReactMarkdown className='prose prose-sm text-white'>
-          {message.content}
+            {message.content + ' ' + key}
         </ReactMarkdown>
       </UserMessage>
     ) : (
@@ -154,26 +258,18 @@ export default function PostRecipePage() {
   }
 
   return (
-    <main>
+    <main className='flex items-stretch h-screen max-h-screen'>
       <ChatSidebar />
-      <div className="pl-80">
+      <div className='h-screen overflow-auto flex-1'>
+        <ChatHeader />
         <div className="max-w-2xl mx-auto px-4 w-full h-screen flex flex-col">
           <div className="flex-1 flex flex-col justify-end">
             <p className="mb-6 text-sm text-gray-400 text-center">
               System:{" "}
-              {currentChat?.messages.find(
+              {currentChat?.messages?.find(
                 (c: ChatCompletionResponseMessage) => c.role === "system"
               )?.content || defaultSystemPrompt}
             </p>
-
-            <div>
-              <Button
-                onClick={() => setSystemPromptsOpen(true)}
-                color="fuchsia"
-              >
-                Change system prompt
-              </Button>
-            </div>
 
             <div className="flex flex-col gap-4 mt-4">
               {renderMessages()}
@@ -186,45 +282,41 @@ export default function PostRecipePage() {
               ></div>
             </div>
           </div>
-          <div className="sticky bottom-0 left-0 right-0 py-4">
-            {messages.length <= 0 ? (
+          <div className="sticky bottom-0 left-0 right-0 py-4 bg-white">
+            {!currentChat?.messages?.length || currentChat?.messages?.length <= 0 ? (
               <div className="mb-3 flex items-center justify-center flex-wrap">
-                <Button onClick={() => setSystemPromptsOpen(true)}>
+                <AppButton onClick={() => setSystemPromptsOpen(true)}>
                   Change system prompt
-                </Button>
+                </AppButton>
               </div>
             ) : null}
-            <div className="flex items-end gap-4">
-              <div className="flex-1">
-                <div className="relative rounded-md shadow-sm">
-                  <GrowingTextArea
-                    id="chat-input-textbox"
-                    placeholder="Your message here..."
-                    spellcheck="false"
-                    value={prompt}
-                    onChange={(e: any) =>
-                      e.key !== "Enter" && setPrompt(e.target.value)
-                    }
-                    onSubmit={() => {
-                      console.log({
-                        prompt,
-                      });
-                      if (!prompt || prompt === "" || prompt === "\n") {
-                        return null;
-                      } else {
-                        onGenerateTitleClicked();
-                      }
-                    }}
-                  ></GrowingTextArea>
-                </div>
+
+            {currentChat?.messages?.length && currentChat?.messages?.length > 0 ? (
+              <div className="mb-3 flex items-center justify-center flex-wrap">
+                <AppButton background='pink' prefixIcon='i-tabler-reload' disabled={loadingAnswer} onClick={regeneateResponse}>
+                  Regenerate response
+                </AppButton>
               </div>
+            ) : null}
+            <div className="flex items-end gap-4 bg-white">
+              <AppTextArea
+                id="chat-input-textbox"
+                placeholder="Your message here..."
+                className='flex-1'
+                rows={1}
+                value={prompt}
+                onSubmit={onGenerateTitleClicked}
+                onChange={(e: any) =>
+                  e.key !== "Enter" && setPrompt(e.target.value)
+                }
+              ></AppTextArea>
               <span className="">
-                <Button
+                <AppButton
                   disabled={!prompt || prompt === "" || prompt === "\n"}
                   onClick={onGenerateTitleClicked}
                 >
                   Submit
-                </Button>
+                </AppButton>
               </span>
             </div>
           </div>
@@ -246,3 +338,11 @@ export default function PostRecipePage() {
     </main>
   );
 }
+
+ChatPage.getLayout = (page: any) => {
+  return <LayoutMain navCollapsed={true}>
+    {page}
+  </LayoutMain>
+}
+
+export default ChatPage

@@ -8,6 +8,8 @@ export interface Chat {
   id: string;
   title: string;
   description?: string;
+  totalTokens?: number;
+  usage?: any,
   messages: ChatCompletionResponseMessage[]
 }
 
@@ -22,6 +24,8 @@ export const newChatAtom = atom<Chat>({
   id: uuid.v4(),
   title: '',
   description: '',
+  usage: [],
+  totalTokens: 0,
   messages: []
 })
 
@@ -32,6 +36,8 @@ export const setNewChatAtom = atom(
       id: uuid.v4(),
       title: '',
       description: '',
+      usage: [],
+      totalTokens: 0,
       messages: []
     })
   }

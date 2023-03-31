@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { Card, Button } from "@tremor/react";
+import LayoutMain from '@/components/Layouts/LayoutMain';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,5 +27,13 @@ export default function Home() {
         </div>
       </main>
     </>
+  )
+}
+
+Home.getLayout = function getLayout(page: any) {
+  return (
+    <LayoutMain>
+      {page}
+    </LayoutMain>
   )
 }

@@ -23,7 +23,7 @@ function ChatItem(props: { chat: Chat; selected?: boolean; onClick: () => void }
   }
 
   return (
-    <div className={`text-gray-300 hover:bg-gray-700 hover:text-white group flex items-center text-sm font-medium w-full space-x-2 justify-between overflow-hidden ${props.selected ? 'bg-gray-800' : ''}`}>
+    <div className={`text-gray-300 hover:bg-gray-700 hover:text-white group flex items-center text-sm font-medium w-full space-x-2 justify-between overflow-hidden ${props.selected ? 'bg-gray-700' : ''}`}>
       <button className="flex items-center justify-start space-x-2 min-w-0 w-full px-2 py-2 text-sm" onClick={props.onClick}>
         <svg
           stroke="currentColor"
