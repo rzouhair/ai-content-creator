@@ -55,7 +55,7 @@ function ChatHeader() {
         </div>
         <div className="text-xs text-gray-400 w-full truncate text-center px-16 space-x-1">
           <span className="shrink-0">GPT-3.5</span>
-          <span className="hidden sm:inline-block">- {currentChat?.totalTokens || 0} tokens -</span>
+          <span className="hidden sm:inline-block">- {currentChat?.exceededMaxTokens ? "Above 4096" : "Under 4096"} tokens -</span>
           <span className="hidden sm:inline-block">{currentChat?.messages.length} messages</span>
         </div>
       </div>

@@ -9,7 +9,8 @@ export interface Chat {
   title: string;
   description?: string;
   totalTokens?: number;
-  usage?: any,
+  usage?: any;
+  exceededMaxTokens?: boolean;
   messages: ChatCompletionResponseMessage[]
 }
 
@@ -26,6 +27,7 @@ export const newChatAtom = atom<Chat>({
   description: '',
   usage: [],
   totalTokens: 0,
+  exceededMaxTokens: false,
   messages: []
 })
 
@@ -37,6 +39,7 @@ export const setNewChatAtom = atom(
       title: '',
       description: '',
       usage: [],
+      exceededMaxTokens: false,
       totalTokens: 0,
       messages: []
     })

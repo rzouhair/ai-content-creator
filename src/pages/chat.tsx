@@ -32,6 +32,9 @@ function ChatPage() {
   const [newChat, setNewChat] = useAtom(newChatAtom)
   const [, resetChat] = useAtom(setNewChatAtom)
 
+  const [isStream] = useState(true)
+  const [stream, setStream] = useState(new SSE())
+
   const [loadingAnswer, setLoadingAnswer] = useState(false)
 
   const [defaultSystemPrompt, setSystemPrompt] = useState("You are a standup comedian, you make people laugh with your satire, jokes and humor. You answer everything in a humorous way to cheer the user up. Use satire and make fun of everything the user says in a positive way.")
@@ -57,11 +60,10 @@ function ChatPage() {
     setTimeout(() => {
       dummyMessage?.scrollIntoView({ behavior: 'smooth' })
     }, 200)
-  }, [dummyMessage, currentChat])
+  }, [dummyMessage, currentChat, currentChat?.messages])
   
 
   const manageChatCreate = (messages: ChatCompletionResponseMessage[], usage?: CreateCompletionResponseUsage) => {
-    console.log({ currentUsage: currentChat?.usage, totalTokens: currentChat?.totalTokens, id: currentChat?.id })
     if (currentChat?.id) {
       updateChat(currentChat?.id, {
         ...currentChat,
@@ -69,7 +71,6 @@ function ChatPage() {
         usage: currentChat.usage?.concat([usage?.prompt_tokens, usage?.completion_tokens]) || [],
         messages,
       })
-      console.log(currentChat.messages[currentChat.messages.length - 1])
     } else {
       setNewChat({
         id: newChat.id,
@@ -84,7 +85,110 @@ function ChatPage() {
     }
   }
 
-  const appendMessages = async (lengthErrorOccurred?: boolean) => {
+async function loadAnswer(mAppended: any) {
+    setLoadingAnswer(true)
+    const systemPrompt: any = currentChat?.messages?.find((c) => c.role === 'system')
+    if (isStream) {
+      const url = "https://api.openai.com/v1/chat/completions"
+      const data = {
+        model: 'gpt-3.5-turbo-0301',
+        messages: (currentChat?.exceededMaxTokens) ? [systemPrompt, ...mAppended.slice(-10)] : mAppended as any,
+        stream: true,
+      }
+      let source = new SSE(url, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPEN_API_KEY}`
+        },
+        method: 'POST',
+        payload: JSON.stringify(data)
+      })
+
+      let currentIndex: number | null = null
+      if (currentIndex === null) {
+        setStream(source)
+        currentIndex = currentChat?.messages.length || 1
+        const newMessage: ChatCompletionResponseMessage = { role: "assistant", content: "" }
+        manageChatCreate([
+          ...mAppended,
+          newMessage,
+        ])
+        scrollDown()
+        setLoadingAnswer(true)
+        source.stream()
+      }
+      let overallText = ''
+      source.addEventListener("abort", (e: any) => {
+        console.log({ aborted: e })
+      })
+
+      source.addEventListener("error", async(e: any) => {
+        const errorPayload = JSON.parse(e.data)
+        
+        if (errorPayload.error.code === "context_length_exceeded") {
+          if (currentChat) {
+            updateChat(currentChat?.id, {
+              ...currentChat,
+              messages: currentChat?.messages.slice(0, currentChat.messages.length),
+              exceededMaxTokens: false
+            })
+          }
+          await appendMessages()
+        } else {
+          console.error(e)
+        }
+        setLoadingAnswer(false)
+      })
+
+      source.addEventListener("message", (e: any) => {
+        if (e.data === '[DONE]') {
+          manageChatCreate([
+            ...mAppended,
+            { role: 'assistant', content: overallText },
+          ])
+          scrollDown()
+          overallText = ''
+          currentIndex = null
+          setStream(null)
+          setLoadingAnswer(false)
+          return
+        } else {
+          if (currentIndex === null) {
+            console.log('NULL RETURN')
+            return
+          }
+          const payload = JSON.parse(e.data)
+          const text = payload.choices[0].delta?.content
+          if (text) {
+            overallText += text
+            manageChatCreate([
+              ...mAppended.slice(0, mAppended.length),
+              { role: 'assistant', content: overallText },
+            ])
+          }
+        }
+      })
+    } else {
+      const response = await openai.createChatCompletion({
+        model: 'gpt-3.5-turbo-0301',
+        messages: (currentChat?.exceededMaxTokens) ? mAppended.slice(-10).unshift(systemPrompt) : mAppended as any,
+        stream: true,
+      }, { responseType: 'stream' })
+
+      setLoadingAnswer(true)
+
+      const newMessage = response.data.choices[0].message 
+      if (newMessage) {
+        manageChatCreate([
+          ...mAppended,
+          newMessage,
+        ], response.data.usage)
+        scrollDown()
+      }
+    }  
+  }
+
+  async function appendMessages() {
     const currentUserPrompt: ChatCompletionResponseMessage = {
       role: 'user',
       content: prompt
@@ -96,7 +200,6 @@ function ChatPage() {
     if (!currentChat?.messages?.find((c) => c.role === 'system')) {
       mAppended.unshift({ role: 'system', content: defaultSystemPrompt })
     }
-    const systemPrompt: any = currentChat?.messages?.find((c) => c.role === 'system')
     setMessages(mAppended)
 
     if (currentChat?.id) {
@@ -111,82 +214,7 @@ function ChatPage() {
     }
     scrollDown()
 
-    const url = "https://api.openai.com/v1/chat/completions"
-    const data = {
-      model: 'gpt-3.5-turbo-0301',
-      messages: ((currentChat?.totalTokens && currentChat?.totalTokens >= 4096) || lengthErrorOccurred) ? mAppended.slice(-10).unshift(systemPrompt) : mAppended as any,
-      stream: true,
-    }
-    let source = new SSE(url, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPEN_API_KEY}`
-      },
-      method: 'POST',
-      payload: JSON.stringify(data)
-    })
-
-
-    let currentIndex: number | null = null
-    if (currentIndex === null) {
-      currentIndex = currentChat?.messages.length
-      const newMessage: ChatCompletionResponseMessage = { role: "assistant", content: "" }
-      manageChatCreate([
-        ...mAppended,
-        newMessage,
-      ])
-      scrollDown()
-      setTimeout(() => {
-        console.log({ length: currentChat?.messages.length })
-        source.stream()
-      }, 1000);
-    }
-    source.addEventListener("message", (e) => {
-      if (e.data === '[DONE]') {
-        console.log({ done: e })
-        currentIndex = null
-        return
-      } else {
-        if (currentIndex === null) {
-          console.log('NULL RETURN')
-          return
-        }
-        const payload = JSON.parse(e.data)
-        const text = payload.choices[0].delta?.content
-        if (text) {
-          // console.log(txt)
-          const lastMessage: any = currentChat?.messages[currentChat.messages.length]
-          console.log({ lastMessage })
-          if (lastMessage) {
-            try {
-              lastMessage.content += text
-            } catch {
-              console.log({ text, last: lastMessage?.content })
-            }
-            /* updateChat(currentChat?.id || '', {
-              ...currentChat,
-              messages: currentChat?.messages.slice(-1).push(lastMessage) as any,
-            }) */
-
-          }
-        }
-      }
-    })
-    /* const response = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo-0301',
-      messages: ((currentChat?.totalTokens && currentChat?.totalTokens >= 4096) || lengthErrorOccurred) ? mAppended.slice(-10).unshift(systemPrompt) : mAppended as any,
-      stream: true,
-    }, { responseType: 'stream' }) */
-
-
-    /* const newMessage = response.data.choices[0].message 
-    if (newMessage) {
-      manageChatCreate([
-        ...mAppended,
-        newMessage,
-      ], response.data.usage)
-      scrollDown()
-    } */
+    loadAnswer(mAppended)
   }
 
   const onGenerateTitleClicked = async() => {
@@ -197,18 +225,28 @@ function ChatPage() {
     } catch (error: any) {
       const errorCode = error?.response?.data?.error?.code
       if (errorCode === "context_length_exceeded") {
-        await appendMessages(true)
+        if (currentChat)
+          updateChat(currentChat?.id, {
+            ...currentChat,
+            exceededMaxTokens: true
+          })
+        await appendMessages()
       } else {
         console.error(error)
       }
-    } finally {
-      setLoadingAnswer(false)
     }
   }
 
   const regeneateResponse = async() => {
     try {
       setLoadingAnswer(true)
+      if (currentChat) {
+        const lastMessage = currentChat.messages[currentChat.messages.length - 1]
+        updateChat(currentChat?.id, {
+          ...currentChat,
+          messages: lastMessage.role === 'user' ? currentChat.messages : currentChat.messages.slice(0, currentChat.messages.length - 1),
+        })
+      }
       scrollDown()
       if (currentChat?.messages) {
         const response = await openai.createChatCompletion({
@@ -219,7 +257,7 @@ function ChatPage() {
 
         if (newMessage)
           manageChatCreate([
-            ...currentChat.messages,
+            ...currentChat.messages.slice(0, currentChat.messages.length - 1),
             newMessage,
           ], response.data.usage)
       }
@@ -233,28 +271,34 @@ function ChatPage() {
 
   const renderMessages = () => {
     return currentChat?.messages?.filter(message => message.role !== 'system').map((message, key) => message.role === 'user' ? (
-      <UserMessage key={key}>
-        <ReactMarkdown className='prose prose-sm text-white'>
-            {message.content + ' ' + key}
-        </ReactMarkdown>
-      </UserMessage>
-    ) : (
-      <AssistantMessage key={key}>
-        <ReactMarkdown
-          className='prose prose-sm'
-          components={{
-            li({ node, className, children }) {
-              return <MarkdownLi>
-                {children}
-              </MarkdownLi>
-            },
-          }}
-          remarkPlugins={[remarkGfm]}
-        >
-          {message.content}
-        </ReactMarkdown>
-      </AssistantMessage>
-    )) || null
+        <UserMessage key={key}>
+          <ReactMarkdown className='prose prose-sm text-white'>
+              {message.content}
+          </ReactMarkdown>
+        </UserMessage>
+      ) : (
+        <AssistantMessage key={key}>
+          <ReactMarkdown
+            className='prose prose-sm'
+            components={{
+              li({ node, className, children }) {
+                return <MarkdownLi>
+                  {children}
+                </MarkdownLi>
+              },
+            }}
+            remarkPlugins={[remarkGfm]}
+          >
+            {message.content}
+          </ReactMarkdown>
+        </AssistantMessage>
+      )) || null
+  }
+
+  const abortStream = () => {
+    stream?.close()
+    setStream(null)
+    setLoadingAnswer(false)
   }
 
   return (
@@ -293,9 +337,14 @@ function ChatPage() {
 
             {currentChat?.messages?.length && currentChat?.messages?.length > 0 ? (
               <div className="mb-3 flex items-center justify-center flex-wrap">
-                <AppButton background='pink' prefixIcon='i-tabler-reload' disabled={loadingAnswer} onClick={regeneateResponse}>
-                  Regenerate response
-                </AppButton>
+                {(isStream && loadingAnswer) && <AppButton background='red' prefixIcon='i-tabler-reload' disabled={!loadingAnswer} onClick={abortStream}>
+                  Stop Answer
+                </AppButton>}
+                {
+                  !loadingAnswer && <AppButton background='pink' prefixIcon='i-tabler-reload' disabled={loadingAnswer} onClick={regeneateResponse}>
+                    Regenerate response
+                  </AppButton>
+                }
               </div>
             ) : null}
             <div className="flex items-end gap-4 bg-white">

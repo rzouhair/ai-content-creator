@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const AppTextarea = ({
   label,
@@ -68,13 +68,16 @@ const AppTextarea = ({
       setShift(true)
     }
   }
+  
+  useEffect(() => {
+    auto_grow()
+  }, [value])
 
   const handleChange = (event: any) => {
     if (event.nativeEvent.inputType === 'insertLineBreak' && !shift) {
       onSubmit(event)
       return;
     }
-    auto_grow()
     const newValue = event.target.value;
     if (maxLength && newValue.length > maxLength) return;
     onChange(event);
