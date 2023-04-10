@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+// @ts-ignore
+import { debounce } from 'lodash-es'
 
 const AppInput = ({
   label,
@@ -18,6 +20,8 @@ const AppInput = ({
   prefix,
   suffix,
   invalid,
+  debounceTime = 500,
+  debounced = false,
   ...rest
 }: {
   label?: string;
@@ -26,8 +30,8 @@ const AppInput = ({
   validation?: RegExp;
   errorMessage?: string;
   autocomplete?: string;
-  wrapperClassName?: string,
-  hintClassName?: string,
+  wrapperClassName?: string;
+  hintClassName?: string;
   type?: string;
   value: string;
   onChange: (e: any) => void
@@ -38,9 +42,19 @@ const AppInput = ({
   prefix?: JSX.Element;
   suffix?: JSX.Element;
   invalid?: boolean;
+  debounced?: boolean
+  debounceTime?: number
 }) => {
 
   const [focused, setFocused] = useState(false)
+
+  const inputRef = useRef(null)
+  useEffect(() => {
+    if (debounced && inputRef.current) {
+      // @ts-ignore
+      inputRef.current.value = value
+    }
+  }, [debounced, value])
 
   const handleChange = (event: any) => {
     const newValue = event.target.value;
@@ -55,6 +69,9 @@ const AppInput = ({
     }
   }
 
+  // @ts-ignore
+  const debouncedChangeHandler = useCallback(debounce(handleChange, debounceTime), [])
+
   const handleFocus = () => {
     setFocused(true)
   }
@@ -66,14 +83,15 @@ const AppInput = ({
         {prefix || null}
         <input
           type={type === 'password' ? 'password' : 'text'}
+          ref={inputRef}
           placeholder={placeholder}
-          value={value}
           maxLength={maxLength}
           autoComplete={autocomplete}
-          onChange={handleChange}
+          onChange={debounced ? debouncedChangeHandler : handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
           className={`outline-none flex-1 w-full ${className}`}
+          {...(debounced ? {} : { value })}
           {...rest}
         />
         {suffix || null}
