@@ -40,14 +40,14 @@ function AppNavItem(props: {
   }
 
   return (
-    <LocalWrapper to={props.to} className={`flex items-center px-3 py-2 rounded-md ${props.collapsed ? 'w-12 h-12' : 'h-10'} cursor-pointer transition-all duration-100 ${themes[props.color || 'dark'].bg} ${router.pathname === props.to && themes[props.color].active}`}>
+    <LocalWrapper to={props.to} className={`flex items-center mx-auto px-3 py-2 rounded-md ${props.collapsed ? 'w-12 h-12' : 'w-full h-10'} cursor-pointer transition-all ${themes[props.color || 'dark'].bg} ${router.pathname === props.to && themes[props.color].active}`}>
       {/*
         - Icon
         - Nav item
         - notifications placeholder
         - chevron
       */}
-      <span className={`${!props.collapsed ? 'mr-4' : 'm-0'}`}>
+      <span className={`${!props.collapsed ? 'mr-4' : 'm-0'} flex items-center justify-center`}>
         <i className={`${props.icon} text-2xl text-gray-100 ${themes[props.color || 'dark'].icons}`}></i>
       </span>
       { !props.collapsed && <p className={`${themes[props.color || 'dark'].text} flex-1 mr-2 font-medium`}>{ props.title }</p> }

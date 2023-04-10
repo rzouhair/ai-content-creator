@@ -114,6 +114,77 @@ a {
   }
 }
  */
+
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;700;900&display=swap');
+
+ :root {
+  font-size: 15px;
+ }
+
+ * {
+
+  font-family: Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+ }
+
+ .ql-container.ql-snow {
+    @apply !border-none;
+ }
+.quill .ql-snow .ql-editor {
+  border-radius: 0.25rem;
+
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  padding-left: 3rem;
+  padding-right: 3rem;
+
+  font-size: 1rem !important;
+  line-height: 1.8;
+
+  height: 100%;
+  outline: none;
+  overflow-y: auto;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -moz-tab-size: 4;
+  text-align: left;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+ 
+.ql-snow .ql-editor h1 {
+    font-size: 1.875rem !important;
+    font-weight: 700;
+    line-height: 2.5rem;
+    letter-spacing: -.025em;
+ }
+
+ .ql-snow .ql-editor h2 {
+    font-size: 1.4rem !important;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+
+.ql-snow .ql-editor h3 {
+    font-size: 1.17rem !important;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+.ql-snow .ql-editor h4 {
+    font-size: 1.125rem !important;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+.ql-snow .ql-editor p {
+    font-weight: 300;
+}
+
+.quill h1, .ql-editor h2, .ql-editor h3, .ql-editor h4 {
+  margin: 0.5rem 0 !important;
+}
+
+.quill p {
+  margin: 0.5rem 0 !important;
+}
  
  .ProseMirror {
   outline: none !important;

@@ -2,6 +2,7 @@ const { iconsPlugin, getIconCollections } = require("@egoist/tailwindcss-icons")
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './node_modules/@tremor/**/*.{js,ts,jsx,tsx}',
     "./src/**/*.{js,ts,jsx,tsx}",

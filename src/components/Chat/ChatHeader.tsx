@@ -5,7 +5,7 @@ import { currentChat as currentChatAtom } from '@/stores/messages'
 function ChatHeader() {
   const [currentChat] = useAtom(currentChatAtom)
   return (
-    <div className="hide-when-print sticky top-0 z-30 bg-white backdrop-blur">
+    <div className="hide-when-print h-[50px] sticky top-0 z-30 bg-white backdrop-blur">
       <div className="flex absolute left-1 top-0 bottom-0 items-center justify-center">
         <button
           type="button"
@@ -49,7 +49,7 @@ function ChatHeader() {
           </svg>
         </button>
       </div>
-      <div className="flex items-center justify-center w-full p-2 border-bottom-2 border-gray-200 shadow-bottom shadow-md shadow-light-100 flex-col min-w-0">
+      <div className="flex items-center justify-center w-full p-2 h-[50px] border-bottom-2 border-gray-200 shadow-bottom shadow-md shadow-light-100 flex-col min-w-0">
         <div className="font-semibold truncate w-full text-center px-12 text-black">
           {currentChat?.title || 'New chat'}
         </div>

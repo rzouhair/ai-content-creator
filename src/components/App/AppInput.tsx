@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 // @ts-ignore
 import { debounce } from 'lodash-es'
 
-const AppInput = ({
+const AppNumberInput = ({
   label,
   placeholder,
   maxLength,
@@ -78,8 +78,8 @@ const AppInput = ({
 
   return (
     <div>
-      <label htmlFor={rest.id} className="mb-1.5 text-sm">{label}</label>
-      <div className={`${wrapperClassName || ''} box-border flex flex-row items-center px-2 gap-2 h-10 transition-all bg-white border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 hover:border-${color}-300 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_4px_#F2F4F7]`}`}>
+      <label htmlFor={rest.id} className="text-base font-semibold">{label}</label>
+      <div className={`${wrapperClassName || ''} dark:text-white mt-1.5 box-border flex flex-row items-center px-2 gap-2 h-10 transition-all bg-white dark:bg-gray-700 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 dark:border-gray-600 hover:border-${color}-300 hover:border-${color}-600 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_3px_#F2F4F7]`}`}>
         {prefix || null}
         <input
           type={type === 'password' ? 'password' : 'text'}
@@ -90,7 +90,7 @@ const AppInput = ({
           onChange={debounced ? debouncedChangeHandler : handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
-          className={`outline-none flex-1 w-full ${className}`}
+          className={`outline-none flex-1 text-base w-full bg-transparent ${className}`}
           {...(debounced ? {} : { value })}
           {...rest}
         />
@@ -103,4 +103,4 @@ const AppInput = ({
   );
 };
 
-export default AppInput;
+export default AppNumberInput;

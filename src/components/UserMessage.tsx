@@ -1,9 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 const UserMessage = (props: any) => {
+
+  const [copied, setCopied] = useState(false)
+
+  const copy = async() => {
+    await navigator.clipboard.writeText(props.children.props.children)
+    setCopied(true)
+    setTimeout(() => {
+      setCopied(false)
+    }, 1500);
+  }
+
   return (
-    <div className="relative flex items-start gap-3 response-block scroll-mt-32 rounded-md pb-2 pt-2 group min-h-[52px] duration-100 transition-colors">
-      <div>
+    <div className="group relative flex items-start gap-3 response-block scroll-mt-32 rounded-md pb-2 pt-2 group min-h-[52px] duration-100 transition-colors">
+      <div className='flex flex-col items-center gap-2'>
         <button className="w-9 h-9 bg-gray-200 rounded-md  flex-none flex items-center justify-center text-gray-500 hover:bg-gray-300 transition-all group active:bg-gray-200 overflow-hidden">
           <svg
             stroke="currentColor"
@@ -30,13 +41,14 @@ const UserMessage = (props: any) => {
             <path d="M464 448H48c-26.51 0-48-21.49-48-48V112c0-26.51 21.49-48 48-48h416c26.51 0 48 21.49 48 48v288c0 26.51-21.49 48-48 48zM112 120c-30.928 0-56 25.072-56 56s25.072 56 56 56 56-25.072 56-56-25.072-56-56-56zM64 384h384V272l-87.515-87.515c-4.686-4.686-12.284-4.686-16.971 0L208 320l-55.515-55.515c-4.686-4.686-12.284-4.686-16.971 0L64 336v48z"></path>
           </svg>
         </button>
+        <div className='group-hover:opacity-100 group-hover:pointer-events-auto opacity-0 pointer-events w-9 h-9 bg-gray-200 rounded-md cursor-pointer flex items-center justify-center' onClick={(e) => copy()}>
+          <i className={`text-xl ${copied ? 'i-tabler-check' : 'i-tabler-copy'}`}></i>
+        </div>
       </div>
-      <div className="w-full">
-        <div>
-          <p className='text-sm mb-1.5 text-gray-700'>User</p>
-          <div className="text-sm w-fit bg-indigo-600 text-white px-3.5 py-2.5 rounded-lg rounded-tl-none max-w-full overflow-auto highlight-darkblue focus:outline">
-            {props.children}
-          </div>
+      <div className="w-full relative">
+        <p className='text-sm mb-1.5 text-gray-700'>User</p>
+        <div className="text-sm w-fit bg-indigo-600 text-white px-3.5 py-2.5 rounded-lg rounded-tl-none max-w-full overflow-auto highlight-darkblue focus:outline">
+          {props.children}
         </div>
       </div>
     </div>

@@ -4,10 +4,15 @@ import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { Card, Button } from "@tremor/react";
 import LayoutMain from '@/components/Layouts/LayoutMain';
+import { useAtom } from 'jotai';
+import { sideBarTheme } from '@/stores/theme';
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+
+  const [theme] = useAtom(sideBarTheme)
+
   return (
     <>
       <Head>
@@ -21,6 +26,7 @@ export default function Home() {
           <Card>
             <h1 className='font-bold'>Hello</h1>
           </Card>
+
           <Button size="lg" onClick={() => console.log("clicked")}>
             Read more
           </Button>

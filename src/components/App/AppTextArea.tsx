@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const AppTextarea = ({
   label,
@@ -20,6 +20,7 @@ const AppTextarea = ({
   prefix,
   suffix,
   invalid,
+  submitOnEnter,
   resizable,
   ...rest
 }: {
@@ -31,6 +32,7 @@ const AppTextarea = ({
   autocomplete?: string;
   wrapperClassName?: string;
   hintClassName?: string;
+  submitOnEnter?: boolean
   rows?: number;
   value: string;
   onChange: (e: any) => void
@@ -51,12 +53,12 @@ const AppTextarea = ({
 
   const textArea = useRef<HTMLTextAreaElement | null>()
 
-  function auto_grow() {
+  const auto_grow = useCallback(() => {
     if (textArea?.current?.style) {
-      textArea.current.style.height = "0px";
+      textArea.current.style.height = `${rows * 20.4}px`;
       textArea.current.style.height = (textArea.current?.scrollHeight)+"px";
     }
-  }
+  }, [rows])
 
   const handleKeyUp = (event: any) => {
     if (event.key === 'Shift') {
@@ -71,10 +73,10 @@ const AppTextarea = ({
   
   useEffect(() => {
     auto_grow()
-  }, [value])
+  }, [value, rows, auto_grow])
 
   const handleChange = (event: any) => {
-    if (event.nativeEvent.inputType === 'insertLineBreak' && !shift) {
+    if (event.nativeEvent.inputType === 'insertLineBreak' && submitOnEnter && !shift) {
       onSubmit(event)
       return;
     }
@@ -96,12 +98,13 @@ const AppTextarea = ({
 
   return (
     <div className={`${className}`}>
-      <label htmlFor={rest.id} className="mb-1.5 text-sm">{label}</label>
-      <div className={`${wrapperClassName || ''} box-border flex flex-row resize-none items-center px-2 gap-2 transition-all bg-white border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 hover:border-${color}-300 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_4px_#F2F4F7]`}`}>
+      <label htmlFor={rest.id} className="text-base font-semibold">{label}</label>
+      <div className={`${wrapperClassName || ''} mt-1.5 box-border flex flex-row resize-none items-center px-2 gap-2 transition-all bg-white dark:text-white dark:bg-gray-700 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 dark:border-gray-700 hover:border-${color}-300 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_3px_#F2F4F7]`}`}>
         {prefix || null}
         <textarea
           placeholder={placeholder}
           value={value}
+          // @ts-ignore
           ref={textArea}
           rows={rows}
           maxLength={maxLength}
@@ -112,7 +115,7 @@ const AppTextarea = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
-          className={`outline-none flex-1 overflow-hidden resize-none w-full py-3 ${inputClassName}`}
+          className={`outline-none bg-transparent flex-1 overflow-hidden text-base resize-none w-full py-2 ${inputClassName}`}
           {...rest}
         />
         {suffix || null}

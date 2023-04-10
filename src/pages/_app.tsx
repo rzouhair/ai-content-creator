@@ -6,7 +6,9 @@ import { Provider as JotaiProvider } from 'jotai'
 
 export default function App({ Component, pageProps }: AppProps ) {
   const getLayout = (Component as any).getLayout || ((page: any) => page)
-  return <JotaiProvider>
-    {getLayout(<Component {...pageProps} />)}
-  </JotaiProvider>
+  return (
+    <JotaiProvider>
+      {getLayout(<Component {...pageProps} />)}
+    </JotaiProvider>
+  )
 }
