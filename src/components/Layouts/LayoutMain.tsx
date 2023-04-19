@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import AppNav from '../App/AppNav/AppNav'
 import { useAtom } from 'jotai'
 import { sideBarTheme } from '@/stores/theme'
@@ -7,12 +7,16 @@ import { setSkills, skills } from '@/stores/templates'
 import { Skill } from '@/lib/@types'
 
 import skillsObj from '@/lib/skills'
+import { activeProject } from '@/stores/projects'
 
 function LayoutMain(props: any) {
 
   const [theme] = useAtom(sideBarTheme)
 
-  const[, _setSkills] = useAtom(setSkills)
+  const [, _setSkills] = useAtom(setSkills)
+  const [currentProject] = useAtom(activeProject)
+
+  const [reloaded, setReloaded] = useState<boolean>(false)
 
   useEffect(() => {
     /* async function fetchSkills() {
@@ -63,11 +67,22 @@ function LayoutMain(props: any) {
     fetchSkills()
   }, [])
 
+  useEffect(() => {
+    setReloaded(false)
+
+    setTimeout(() => {
+      setReloaded(true)
+    }, 1000)
+
+  }, [currentProject])
+
   return (
     <main className={`flex items-stretch justify-center max-h-screen ${theme}`}>
       <AppNav navCollapsed={props.navCollapsed} />
       <div className="flex-1 max-h-screen overflow-auto">
-        { props.children }
+        { reloaded ? props.children : <div className='h-screen w-full flex items-center justify-center'>
+          <i className='i-tabler-loader animate-spin text-2xl text-indigo-600'></i>
+        </div> }
       </div>
     </main>
   )

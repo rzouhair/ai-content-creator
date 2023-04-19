@@ -1,11 +1,27 @@
+import { getDocumentById, updateDocument } from "@/api/documents";
 import QuillToolbar, { modules, formats } from "@/components/App/QuillToolbar";
 import ContentSidebar from "@/components/Content/ContentSidebar";
 import LayoutMain from "@/components/Layouts/LayoutMain";
+import { activeDocumentAtom, setActiveDocumentAtom } from "@/stores/documents";
+import { activeProject } from "@/stores/projects";
+import { sideBarTheme } from "@/stores/theme";
+import { useAtom } from "jotai";
+import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import "react-quill/dist/quill.snow.css";
 
 function ContentDocument() {
+
+  const [theme] = useAtom(sideBarTheme)
+  const [activeDocument] = useAtom(activeDocumentAtom)
+  const [project] = useAtom(activeProject)
+  const [, setActiveDocument] = useAtom(setActiveDocumentAtom)
+
+  const [saving, setSaving] = useState(false)
+
+  const router = useRouter()
+
   const ReactQuill =
     typeof window === "object"
       ? (() => {
@@ -29,38 +45,99 @@ function ContentDocument() {
 
   // This useEffect will only run once, during the first client render
   useEffect(() => {
+    async function getActiveDocument() {
+      try {
+        const res = await getDocumentById(router.query.document as string)
+        console.log({
+          res
+        })
+        if (res) {
+          await setActiveDocument(res)
+          console.log({
+            before: res,
+            initialRenderComplete: false
+          })
+          setEditorContent()
+        }
+      } catch (error) {
+        router.push('/content')
+      }
+    }
+
+    async function setEditorContent () { 
+      setInitialRenderComplete(true);
+
+      setTimeout(async () => {
+        const ref = quill.current;
+        // @ts-ignore
+        ref?.editor.container.classList.remove("ql-container");
+        
+        // @ts-ignore
+        await ref?.editor.setContents(activeDocument?.delta || [])
+        console.log({
+          activeDocument
+        })
+        setValue(activeDocument?.delta)
+
+        // @ts-ignore
+        ref?.editor.container.classList.add(
+          "w-full",
+          "max-w-none",
+          "ql-container"
+        );
+      }, 500);
+    }
+
+    if (!activeDocument)
+      getActiveDocument()
+    
+    else
+      setEditorContent()
     // Updating a state causes a re-render
-    setInitialRenderComplete(true);
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quill, activeDocument]);
 
-    setTimeout(() => {
-      const ref = quill.current;
-      // @ts-ignore
-      ref?.editor.container.classList.remove("ql-container");
-      // @ts-ignore
-      ref?.editor.container.classList.add(
-        "w-full",
-        "max-w-none",
-        "ql-container"
-      );
-    }, 500);
-  }, [quill]);
+  const [value, setValue] = useState("");
 
-  const [value, setValue] = useState("<h1>Step-by-Step: How to Tame Your Baby Cockatiel for a Happy Home</h1><h2>Introduction</h2><h3>Importance of taming baby cockatiels</h3><p><br></p><h3>Understanding their behavior</h3><p><br></p><h2>Steps to Follow for Taming Baby Cockatiels</h2><h3>Creating a safe environment for your cockatiel</h3><p>When it comes to creating a safe environment for your cockatiel, there are a few key things you need to consider. Make sure their cage is large enough for them to move around comfortably and that it's made of high-quality, non-toxic materials. Avoid placing their cage near any potential hazards like open windows or doors, and keep any toxic plants or chemicals out of their reach.</p><h3>Bonding with your cockatiel through talks and songs</h3><p><br></p><h3>Hand-feeding to develop trust</h3><h3><br></h3><h3>Gradual training to encourage interaction</h3><p><br></p><h3>Rewards and positive reinforcement</h3><p><br></p><h3>Consistency in training</h3><p><br></p><h2>Additional Tips for Successful Taming</h2><h3>Reading body language and identifying signs of stress</h3><p><br></p><h3>Moderate handling and socialization</h3><p><br></p><h3>Timeframe for taming</h3><p><br></p><h2>Conclusion</h2><h3>Summary of the steps and tips provided</h3><p><br></p><h3>Importance of patience and consistency</h3><p><br></p><h3>Benefits of a tamed Cockatiel</h3><p><br></p><h1><br></h1><p><br></p>");
+  const delayTimeoutRef = useRef();
+  const handleEditorChange = (content: any, delta: any, source: any, editor: any) => {
+    if (delayTimeoutRef.current) {
+      clearTimeout(delayTimeoutRef.current);
+    }
+    // @ts-ignore
+    delayTimeoutRef.current = setTimeout(async () => {
+      setSaving(true)
+      setValue(editor.getContents());
+      try {
+        await updateDocument(activeDocument?._id as string, {
+          ...activeDocument,
+          delta: editor.getContents(),
+          content: editor.getText(),
+        })
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setSaving(false)
+      }
+    }, 2000); // Adjust the delay time as needed
+  };
+
 
   return (
     <div className="flex items-stretch h-screen max-h-screen">
       <ContentSidebar />
       {initialRenderComplete && (
         <div className="flex-1 flex flex-col items-start rounded max-h-screen overflow-auto">
-          <QuillToolbar />
+          <QuillToolbar loading={saving} />
           <ReactQuill
             ref={quill}
             className="!w-full max-w-5xl mx-auto max-h-screen overflow-auto flex-1"
             theme="snow"
             modules={modules}
             formats={formats}
-            onChange={setValue}
-            defaultValue={value}
+            onChange={handleEditorChange}
+            value={value}
           />
           {/* <div
             className="fixed bottom-0 z-20 transition-all duration-150 pointer-events-none inset-x-0"
@@ -105,9 +182,9 @@ function ContentDocument() {
                     className="w-6 h-6"
                   >
                     <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     ></path></svg>
                 </button>
@@ -144,6 +221,9 @@ function ContentDocument() {
           <AppEditor /> */}
         </div>
       )}
+      <div className={`w-full max-w-md h-screen transition-colors ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-800' }`}>
+        <h1>hlo</h1>
+      </div>
     </div>
   );
 }

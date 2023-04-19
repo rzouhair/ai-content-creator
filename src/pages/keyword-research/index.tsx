@@ -6,11 +6,17 @@ import React, { useState, useCallback, useEffect } from 'react'
 import axios from '@/lib/axios'
 import AppCheckbox from '@/components/App/AppCheckbox'
 import ReactMarkdown from 'react-markdown'
-import { Suggestion } from '@/lib/@types'
+import { Project, Suggestion } from '@/lib/@types'
 import { useRouter } from 'next/router'
 // @ts-ignore
 import { groupBy } from 'lodash-es'
 import AppAccordion from '@/components/App/AppAccordion'
+import { useAtom } from 'jotai'
+import { activeProject } from '@/stores/projects'
+import AppTable from '@/components/App/AppTable'
+import AppTag from '@/components/App/AppTag'
+import AppTooltip from '@/components/App/AppTooltip'
+import { getSuggestions } from '@/api/suggestions'
 
 function KeywordResearch() {
 
@@ -19,6 +25,8 @@ function KeywordResearch() {
   const [keyword, setKeyword] = useState('')
   const [checked, setChecked] = useState(true)
   const [loading, setLoading] = useState(false)
+
+  const [project] = useAtom<Project | null>(activeProject)
 
   const [selectedSuggestions, setSelectedSuggestions] = useState<Suggestion[]>([])
 
@@ -29,13 +37,15 @@ function KeywordResearch() {
     setKeyword(e.target.value)
   }
 
-
   const selectSuggestion = async(i: number) => {
 
     try {
+      if (!project?._id)
+        return
       const data = {
         parent_keyword: keyword,
         search_query: suggestions[i].replaceAll(/<\/?b>/g, ""),
+        project: project?._id
       }
       const res = await axios.post('/keyword-research/suggestions/', data)
 
@@ -50,11 +60,16 @@ function KeywordResearch() {
     }
   }
 
-  const analyzeSerps = async(suggestion_id: string, i: number) => {
+  const analyzeSerps = async(suggestion_id: string) => {
     try {
       const res = await axios.post(`/keyword-research/analyze/${suggestion_id}/`)
 
-      setSelectedSuggestions(selectedSuggestions.map((s: Suggestion) => s._id === suggestion_id ? res.data : s))
+      const suggestionsData = await getSuggestions()
+
+      console.log(suggestionsData)
+
+      if (suggestionsData)
+        setSelectedSuggestions(suggestionsData)
 
     } catch (error) {
       console.error(error)
@@ -89,11 +104,6 @@ function KeywordResearch() {
   }, [])
 
   useEffect(() => {
-    const gSuggestions = groupBy((selectedSuggestions as Suggestion[]), 'parent_keyword');
-    setGroupedSuggestions(gSuggestions)
-  }, [selectedSuggestions])
-
-  useEffect(() => {
     try {
       if (keyword) {
         const data = {
@@ -103,7 +113,10 @@ function KeywordResearch() {
   
         setLoading(true)
         axios.post('/keyword-research/suggest/', data).then((res) => {
-          setSuggestions(res.data || [])
+          setSuggestions(keyword ? [
+            keyword,
+            ...res.data,
+          ] : [])
         }).finally(() => {
           setLoading(false)
         })
@@ -114,6 +127,70 @@ function KeywordResearch() {
       
     }
   }, [keyword, checked])
+
+
+  const columns = React.useMemo(() => [
+    {
+      Header: "Query",
+      accessor: 'search_query',
+    },
+    {
+      Header: "Search keyword",
+      accessor: 'parent_keyword',
+    },
+    {
+      Header: "Status",
+      accessor: 'status',
+      Cell: ({ value }: { value: string }) => {
+        return <AppTag color={
+          value === 'ANALYZED' ? 'green'
+          : value === 'IN_PROGRESS' ? 'yellow'
+          : value === 'ERROR' ? 'red'
+          : 'blue' 
+        }>{ value.toLowerCase() }</AppTag>
+      }
+    },
+    {
+      Header: "Actions",
+      id: 'expander',
+      Cell: ({ row }: { row: any }) => {
+        const sgs: Suggestion = row.original
+        return <div className='flex items-center gap-3 flex-wrap justify-start'>
+          <div className='flex flex-wrap gap-2 items-center justify-end'>
+            <AppTooltip content={
+              <p>{ sgs.status === 'ANALYZED' ? 'Check results' : 'Analyze SERPs' }</p>
+            }>
+              <div>
+                {
+                  sgs.status !== 'ANALYZED' &&
+                    <AppButton
+                      size='md'
+                      square={true}
+                      disabled={sgs.status === 'IN_PROGRESS'}
+                      background={sgs.status === 'IN_PROGRESS' ? 'yellow' : 'orange'}
+                      onClick={(e) => analyzeSerps(sgs._id)}
+                    >
+                      <i className={`${sgs.status === 'IN_PROGRESS' ? 'i-tabler-loader animate-spin' : 'i-tabler-analyze'} text-white text-xl`}></i>
+                    </AppButton>
+                }
+                {
+                  sgs.status === 'ANALYZED' &&
+                    <AppButton
+                      onClick={(e) => getSearch(sgs._id)}
+                      background="blue"
+                      square={true}
+                      size='md'
+                    >
+                      <i className='i-tabler-device-analytics text-white text-xl'></i>
+                    </AppButton>
+                }
+              </div>
+            </AppTooltip>
+          </div>
+        </div>
+      }
+    },
+  ], [])
 
   return (
     <div className='p-4 relative'>
@@ -172,47 +249,14 @@ function KeywordResearch() {
         </div>
       </div>
       <div className='flex flex-col gap-4 my-4'>
-        {
-          Object.entries(groupedSuggestions).map(([parent_keyword, suggestion]: any) => {
-            return <AppAccordion
-              key={parent_keyword}
-              items={[
-                {
-                  title: parent_keyword,
-                  content: () => {
-                    return <div className='mt-4 grid grid-cols-1 md:grid-cols-2 gap-4'>
-                      {suggestion.map((s: Suggestion, i: number) => (
-                        <AppCard key={s._id} className="!pt-2 pb-4 px-4">
-                          <h1 className="text-base font-bold">{ s.search_query }</h1>
-                          <div className='flex flex-wrap gap-2 items-center justify-end'>
-                            {s.status !== 'ANALYZED' && <AppButton prefixIcon='i-tabler-analyze' size='sm' loading={s.status === 'IN_PROGRESS'} onClick={(e) => analyzeSerps(s._id, i)}>Analyze SERPs</AppButton>}
-                            {s.status === 'ANALYZED' && <AppButton suffixIcon='i-tabler-arrow-right' onClick={(e) => getSearch(s._id)} background="purple" size='sm'>Check results</AppButton>}
-                          </div>
-                        </AppCard>
-                      ))}
-                    </div>
-                  }
-                }
-              ]}
-            />
-            /* return <div key={parent_keyword} className="bg-slate-100 p-4 rounded-md">
-              <h2 className='font-bold text-xl capitalize'>{ parent_keyword }</h2>
-              <div className='mt-4 grid grid-cols-1 md:grid-cols-2 gap-4'>
-                {
-                  suggestion.map((s: Suggestion, i: number) => (
-                    <AppCard key={s._id} className="!pt-2 pb-4 px-4">
-                      <h1 className="text-base font-bold">{ s.search_query }</h1>
-                      <div className='flex flex-wrap gap-2 items-center justify-end'>
-                        {s.status !== 'ANALYZED' && <AppButton prefixIcon='i-tabler-analyze' size='sm' loading={s.status === 'IN_PROGRESS'} onClick={(e) => analyzeSerps(s._id, i)}>Analyze SERPs</AppButton>}
-                        {s.status === 'ANALYZED' && <AppButton suffixIcon='i-tabler-arrow-right' onClick={(e) => getSearch(s._id)} background="purple" size='sm'>Check results</AppButton>}
-                      </div>
-                    </AppCard>
-                  ))
-                }
-              </div>
-            </div> */
-          })
-        }
+        <AppTable
+          columns={columns}
+          data={selectedSuggestions}
+          tableTitle={{
+            title: 'Suggestions',
+            subtitle: 'Analyze google search suggestions to get related questions and PPA'
+          }}
+        />
       </div>
     </div>
   )

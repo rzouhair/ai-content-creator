@@ -15,7 +15,7 @@ function ModalBase(props: { open: boolean; onClose: (value: boolean) => void; ti
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25 z-50" />
+          <div className="fixed inset-0 bg-white bg-opacity-70 z-50" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto z-50">

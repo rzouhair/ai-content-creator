@@ -4,7 +4,7 @@ import { skills as skillsAtom } from "@/stores/templates";
 import { sideBarTheme } from "@/stores/theme";
 import { useAtom } from "jotai";
 import ReactMarkdown from 'react-markdown'
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SkillItem from "./ContentTemplates/SkillItem";
 import SkillForm from "./ContentTemplates/SkillForm";
 import Image from "next/image";
@@ -21,8 +21,7 @@ function ContentSidebar() {
   const [skills] = useAtom<Skill[]>(skillsAtom)
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null)
 
-  async function fetchOutputs () {
-
+  const fetchOutputs = useCallback(async () => {
     try {
       if (!selectedSkill) {
         setGeneratedData(null)
@@ -37,13 +36,10 @@ function ContentSidebar() {
     } catch (error) {
       
     }
-  }
+  }, [selectedSkill])
 
 
   useEffect(() => {
-
-    console.log(openai)
-
     if (!selectedSkill) {
       setGeneratedData(null)
       setIcon(null)
@@ -66,7 +62,7 @@ function ContentSidebar() {
     fetchOutputs()
     fetchIcon()
 
-  }, [selectedSkill])
+  }, [fetchOutputs, selectedSkill])
   
   const renderSkills = () => {
     return skills.filter((s: Skill) => s.tags.some((t: Tag) => ["blog", "seo"].includes(t.name.toLowerCase()))).map((s: Skill) => {
@@ -99,7 +95,7 @@ function ContentSidebar() {
   return (
     <div
       id="navbar"
-      className="flex flex-1 flex-col overflow-y-auto w-full max-w-lg"
+      className="flex flex-1 flex-col overflow-y-auto w-full max-w-md"
     >
       <nav className={`flex-1 py-9 transition-colors ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-800' }`}>
         <div className="px-4">

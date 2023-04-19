@@ -63,9 +63,18 @@ export interface Output {
   created_at: string;
 }
 
+export interface Project {
+  _id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Document {
   _id: string;
   name: string;
+  content: string;
   delta: any;
   isPublic: boolean;
   status: string;

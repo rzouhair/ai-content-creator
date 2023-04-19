@@ -105,42 +105,47 @@ export const formats = [
 ];
 
 // Quill Toolbar component
-export const QuillToolbar = () => (
-  <div id="toolbar" className="w-full !border-t-transparent !border-x-transparent !border-b border-gray-200">
-    <span className="ql-formats">
-      <button className="ql-undo">
-        <i className="text-2xl h-[18px] i-tabler-arrow-back" />
-      </button>
-      <button className="ql-redo">
-        <i className="text-2xl h-[18px] i-tabler-arrow-forward" />
-      </button>
-    </span>
-    <span className="ql-formats">
-      <button className="ql-header" value="1" />
-      <button className="ql-header" value="2" />
-      <button className="ql-header" value="3" />
-      <button className="ql-header" value="4" />
-    </span>
-    <span className="ql-formats">
-      <button className="ql-bold" />
-      <button className="ql-italic" />
-      <button className="ql-underline" />
-      <button className="ql-strike" />
-    </span>
-    <span className="ql-formats">
-      <button className="ql-list" value="ordered" />
-      <button className="ql-list" value="bullet" />
-      <button className="ql-indent" value="-1" />
-      <button className="ql-indent" value="+1" />
-    </span>
-    <span className="ql-formats">
-      <select className="ql-align" />
-      <button className="ql-blockquote" />
-      <button className="ql-code-block" />
-      <button className="ql-link" />
-      <button className="ql-image" />
-      <button className="ql-clean" />
-    </span>
+export const QuillToolbar = (props: { loading: boolean }) => (
+  <div id="toolbar" className="flex items-center justify-between gap-2 w-full !border-t-transparent !border-x-transparent !border-b border-gray-200" >
+    <div className="flex-1">
+      <span className="ql-formats">
+        <button className="ql-undo">
+          <i className="text-2xl h-[18px] i-tabler-arrow-back" />
+        </button>
+        <button className="ql-redo">
+          <i className="text-2xl h-[18px] i-tabler-arrow-forward" />
+        </button>
+      </span>
+      <span className="ql-formats">
+        <button className="ql-header" value="1" />
+        <button className="ql-header" value="2" />
+        <button className="ql-header" value="3" />
+        <button className="ql-header" value="4" />
+      </span>
+      <span className="ql-formats">
+        <button className="ql-bold" />
+        <button className="ql-italic" />
+        <button className="ql-underline" />
+        <button className="ql-strike" />
+      </span>
+      <span className="ql-formats">
+        <button className="ql-list" value="ordered" />
+        <button className="ql-list" value="bullet" />
+        <button className="ql-indent" value="-1" />
+        <button className="ql-indent" value="+1" />
+      </span>
+      <span className="ql-formats">
+        <select className="ql-align" />
+        <button className="ql-blockquote" />
+        <button className="ql-code-block" />
+        <button className="ql-link" />
+        <button className="ql-image" />
+        <button className="ql-clean" />
+      </span>
+    </div>
+    <div className="text-md text-gray-400">
+      { props.loading ? <span className="flex items-center gap-1">Saving... <i className="i-tabler-loader animate-spin" /></span> : 'Saved' }
+    </div>
   </div>
 );
 

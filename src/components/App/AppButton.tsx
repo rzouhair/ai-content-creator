@@ -15,6 +15,7 @@ export default function AppButton(
     loading,
     children = 'Button content',
     background = 'indigo',
+    border = 'transparent',
     square,
   }: {
     className?: string;
@@ -30,6 +31,7 @@ export default function AppButton(
     square?: boolean
     children?: any
     background?: string;
+    border?: string
     disabled?: boolean
   }) {
 
@@ -49,7 +51,7 @@ export default function AppButton(
   
   
   return (
-    <button onClick={onClick} className={`flex items-center text-center justify-center transition-all duration-100 font-semibold rounded-lg ${sizes[size]} ${block ? 'w-full' : ''} ${`text-${text || 'white'}`} ${colors} ${className} whitespace-nowrap`}>
+    <button onClick={onClick} className={`flex items-center text-center justify-center transition-all duration-100 font-semibold rounded-lg border ${sizes[size]} ${block ? 'w-full' : ''} ${`text-${text || 'white'}`} ${colors} ${className} ${border ? `border-${border}` : 'border-transparent'} whitespace-nowrap`}>
       { prefixIcon && <i className={`text-lg ${prefixIcon} ${suffixIconClass}`}></i> }
       <span className='flex-1 flex items-center justify-center'>{ children }</span>
       { (suffixIcon && !loading) ? <i className={`text-lg ${suffixIcon} ${suffixIconClass}`}></i> : loading ? <i className={`text-lg i-tabler-loader animate-spin ${suffixIconClass}`}></i> : null }

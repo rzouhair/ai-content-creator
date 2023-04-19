@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import AppNavItem from "./AppNavItem";
 import { useAtom } from "jotai";
 import { setSidebarTheme, sideBarTheme } from "@/stores/theme";
+import { Menu, Transition } from "@headlessui/react";
+import Link from "next/link";
+import AppProjects from "@/components/App/AppNav/AppProjects";
 
 function AppNav(props: { navCollapsed?: boolean }) {
   const [theme] = useAtom(sideBarTheme);
   const [, setSideTheme] = useAtom(setSidebarTheme);
+
   const [navItems] = useState([
     {
       to: "/",
@@ -41,6 +45,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
     },
   ]);
 
+
   return (
     <aside
       className={`${
@@ -58,36 +63,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
       >
         <div className="font-bold text-2xl mb-3 text-white text-center h-8 w-8 bg-gray-700 rounded-lg mx-auto"></div>
 
-        <button
-          className={`group mb-6 flex items-center truncate w-full px-4 py-2 rounded-lg selectionRing hover:ring-gray-300 hover:bg-gray-100 bg-gray-50 ring-1 ring-gray-200 ${props.navCollapsed ? 'justify-center' : 'justify-between'}`}
-          aria-label="Select a project"
-        >
-          <span className={`${props.navCollapsed ? 'hidden' : 'block'} items-start truncate`}>
-            <span className="block text-left mt-1 text-xs font-normal text-gray-500">
-              PROJECT
-            </span>
-            <span className="block text-left truncate font-semibold">
-              Personal
-            </span>
-          </span>
-          <span className={`${props.navCollapsed ? 'py-2' : 'ml-3 -mr-1'}`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              aria-hidden="true"
-              className="w-5 h-5 text-gray-400 group-hover:text-gray-600"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8 9l4-4 4 4m0 6l-4 4-4-4"
-              ></path>
-            </svg>
-          </span>
-        </button>
+        <AppProjects navCollapsed={props.navCollapsed} />
 
         {navItems.map((item, index) => (
           <AppNavItem
@@ -137,5 +113,6 @@ function AppNav(props: { navCollapsed?: boolean }) {
     </aside>
   );
 }
+
 
 export default AppNav;

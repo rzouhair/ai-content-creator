@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 // @ts-ignore
 import { debounce } from 'lodash-es'
 
-const AppInput = ({
+const AppNumberInput = ({
   label,
   placeholder,
   maxLength,
@@ -124,4 +124,4 @@ const AppInput = ({
   );
 };
 
-export default AppInput;
+export default AppNumberInput;
