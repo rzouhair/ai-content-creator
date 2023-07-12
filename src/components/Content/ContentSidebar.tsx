@@ -97,14 +97,14 @@ function ContentSidebar() {
       id="navbar"
       className="flex flex-1 flex-col overflow-y-auto w-full max-w-md"
     >
-      <nav className={`flex-1 py-9 transition-colors ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-800' }`}>
-        <div className="px-4">
+      <nav className={`flex-1 items-center transition-colors ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-800' }`}>
+        <div className="px-4 h-[42px] flex items-center border-b border-gray-200">
           <h2 className="font-semibold p-1 text-indigo-600">
             {
               !selectedSkill ?
                 'Content editor templates' :
-                <div>
-                  <button className="flex items-center gap-2 cursor-pointer w-full mb-4" onClick={(e) => setSelectedSkill(null)}>
+                <div className=" flex items-center">
+                  <button className="flex items-center gap-2 cursor-pointer w-full" onClick={(e) => setSelectedSkill(null)}>
                     <i className="i-tabler-arrow-left min-w-[14px] h-[14px]"></i>
                     <p>Content editor templates</p>
                   </button>
@@ -112,7 +112,7 @@ function ContentSidebar() {
             }
           </h2>
         </div>
-        <div className={`flex flex-col gap-1 px-4 mt-4 border-t border-gray-200 py-4 ${selectedSkill ? 'hidden' : ''}`}>
+        <div className={`flex flex-col gap-1 px-4 py-4 ${selectedSkill ? 'hidden' : ''}`}>
           {renderSkills()}
         </div>
         {selectedSkill && renderSelectedSkill()}

@@ -73,9 +73,9 @@ function Content() {
       </header>
       {!loading && <AppTable
         columns={columns}
-        data={documents}
+        data={documents || []}
         onRowClick={(row: any) => onDocumentClick(row)}
-        tableTitle={{
+      tableTitle={{
           title: 'Documents'
         }}
       />}

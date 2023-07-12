@@ -4,12 +4,15 @@ import { Popover, Transition } from '@headlessui/react';
 import { useRouter } from 'next/router';
 import React, { Fragment, useState } from 'react'
 import AppButton from '../App/AppButton';
+import { useAtom } from 'jotai';
+import { activeProject as _activeProject } from '@/stores/projects'
 
 function Idea(props: { 
   keyword: string;
   qualifier: string;
 }) {
 
+  const [activeProject] = useAtom(_activeProject)
   const [loading, setLoading] = useState<boolean>(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
 
@@ -40,6 +43,7 @@ function Idea(props: {
       const data = {
         parent_keyword: `Ideation process for "${props.qualifier.replace('%', props.keyword)}"`,
         search_query: s.replaceAll(/<\/?b>/g, ""),
+        project: activeProject?._id,
       }
       await axios.post('/keyword-research/suggestions/', data)
     } catch (e) {

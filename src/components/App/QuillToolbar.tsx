@@ -35,6 +35,11 @@ export const modules = {
             range,
             context,
           })
+
+          let selection = null
+          let ctx = ""
+          let command = ""
+
           if (range.length === 0) {
             const cursorPosition = this.quill.getSelection()?.index;
             if (!cursorPosition) return;
@@ -42,35 +47,46 @@ export const modules = {
             const lineStartPosition = cursorPosition - offset
             this.quill?.setSelection(lineStartPosition, offset);
 
-            const selection = this.quill?.getSelection()
+            selection = this.quill?.getSelection()
 
             if (!selection)
               return
 
-            const text = this.quill?.getText(lineStartPosition, offset)
+            command = this.quill?.getText(lineStartPosition, offset)
 
             const start = 0;
             const end = selection.index;
-            const context = this.quill.getText(start, end - start);
+            ctx = this.quill.getText(start, end - start);
 
             console.log({
-              text,
-              context,
+              command,
+              ctx,
             })
 
-            const data = await getCompletion({
-              command: text,
-              context: context,
-            })
+          } else {
+            selection = this.quill?.getSelection()
+            const start = selection.index;
+            const end = selection.length;
+            
+            const start2 = 0
+            const end2 = selection.index
 
-            console.log({
-              data: data?.data,
-            })
-
-            this.quill.deleteText(selection.index, selection.length, "user");
-            this.quill.insertText(selection.index, data?.data.content, "user");
-
+            command = this.quill.getText(start, start+end);
+            ctx = this.quill.getText(start2, end2 - start2);
           }
+
+          const data = await getCompletion({
+            command,
+            context: ctx,
+          })
+
+          console.log({
+            data: data?.data,
+          })
+
+          this.quill.deleteText(selection.index, selection.length, "user");
+          this.quill.insertText(selection.index, data?.data?.content, "user");
+
         }
       },
     }

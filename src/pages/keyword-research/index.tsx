@@ -16,7 +16,7 @@ import { activeProject } from '@/stores/projects'
 import AppTable from '@/components/App/AppTable'
 import AppTag from '@/components/App/AppTag'
 import AppTooltip from '@/components/App/AppTooltip'
-import { getSuggestions } from '@/api/suggestions'
+import { deleteSuggestion, getSuggestions } from '@/api/suggestions'
 
 function KeywordResearch() {
 
@@ -35,6 +35,20 @@ function KeywordResearch() {
 
   const changeHandler = async(e: any) => {
     setKeyword(e.target.value)
+  }
+
+  async function fetchSuggestions() {
+    try {
+      const res = await axios.get('/keyword-research/suggestions/')
+      setSelectedSuggestions(res.data)
+
+      const gSuggestions = groupBy((res.data as Suggestion[]), 'parent_keyword');
+      setGroupedSuggestions(gSuggestions)
+
+      console.log({ gSuggestions })
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const selectSuggestion = async(i: number) => {
@@ -76,6 +90,15 @@ function KeywordResearch() {
     }
   }
 
+  const delSuggestion = async(suggestion_id: string) => {
+    try {
+      await deleteSuggestion(suggestion_id)
+      await fetchSuggestions()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   const getSearch = async(suggestion_id: string) => {
     try {
       router.push(`/keyword-research/suggestion/${suggestion_id}`)
@@ -86,20 +109,6 @@ function KeywordResearch() {
   }
 
   useEffect(() => {
-    async function fetchSuggestions() {
-      try {
-        const res = await axios.get('/keyword-research/suggestions/')
-        setSelectedSuggestions(res.data)
-
-        const gSuggestions = groupBy((res.data as Suggestion[]), 'parent_keyword');
-        setGroupedSuggestions(gSuggestions)
-
-        console.log({ gSuggestions })
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
     fetchSuggestions()
   }, [])
 
@@ -186,6 +195,21 @@ function KeywordResearch() {
                 }
               </div>
             </AppTooltip>
+
+            {
+              sgs.status !== 'IN_PROGRESS' && <AppTooltip content={
+                <p>Delete suggestion</p>
+              }>
+                <AppButton
+                  size='md'
+                  square={true}
+                  background="red"
+                  onClick={(e) => delSuggestion(sgs._id)}
+                >
+                  <i className={`i-tabler-trash text-white text-xl`}></i>
+                </AppButton>
+              </AppTooltip>
+            }
           </div>
         </div>
       }

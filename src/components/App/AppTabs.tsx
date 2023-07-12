@@ -36,7 +36,7 @@ export default function AppTabs({ tabs }: { tabs: Tabs }) {
             <Tab.Panel
               key={idx}
               className={classNames(
-                'rounded-xl bg-white p-3 !outline-none',
+                'rounded-xl bg-transparent p-3 !outline-none',
                 
               )}
             >

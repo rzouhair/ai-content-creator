@@ -78,6 +78,7 @@ export interface Document {
   delta: any;
   isPublic: boolean;
   status: string;
+  suggestion: Suggestion | null;
   created_at: string;
   updated_at: string;
 }
