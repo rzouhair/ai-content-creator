@@ -1,3 +1,4 @@
+import AppButton from "@/components/App/AppButton";
 import AppTable from "@/components/App/AppTable";
 import AppTabs from "@/components/App/AppTabs";
 import AppTag from "@/components/App/AppTag";
@@ -33,6 +34,12 @@ function SuggestionById() {
     {
       Header: "Question",
       accessor: 'question',
+      Cell: ({value}: { value: string }) => {
+        return <div className="text-sm text-gray-800 flex items-center flex-wrap items-center gap-2">
+          <p>{ value }</p>
+          <i className='text-indigo-800 i-tabler-arrow-up-right font-semibold text-xl cursor-pointer' onClick={(e) => window.open(`https://www.google.com/search?q=${value.replaceAll(/<\/?b>/g, "")}&gl=us`, '_blank')} />
+        </div>
+      }
     },
     {
       Header: "Visible in SERPs",
