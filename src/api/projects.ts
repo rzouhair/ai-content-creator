@@ -2,12 +2,17 @@ import { Document, Project } from "@/lib/@types";
 import axiosInstance from "@/lib/axios";
 import { AxiosResponse } from "axios";
 
-export const getProjects = async(): Promise<Project[] | undefined> => {
+export const getProjects = async (): Promise<Project[] | undefined> => {
   try {
-    const res = await axiosInstance.get('/content-gen/projects/')
-    return res.data
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/projects/`);
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+    const data = await res.json();
+    return data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 }
 
