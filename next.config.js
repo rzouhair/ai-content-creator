@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   reactStrictMode: false,
   typescript: {
     // !! WARN !!
@@ -8,9 +9,9 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  experimental: {
-    runtime: 'experimental-edge',
-  },
+  images: {
+    unoptimized: true
+  }
 }
 
 module.exports = nextConfig
