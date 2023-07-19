@@ -354,6 +354,7 @@ async function loadAnswer(mAppended: any) {
                 className='flex-1'
                 rows={1}
                 value={prompt}
+                submitOnEnter={true}
                 onSubmit={onGenerateTitleClicked}
                 onChange={(e: any) =>
                   e.key !== "Enter" && setPrompt(e.target.value)

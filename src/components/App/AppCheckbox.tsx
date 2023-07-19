@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function AppCheckbox({ className, partiallyChecked, children, checked, onChange, id }: { className?: string; partiallyChecked?: boolean; children?: any; checked?: boolean; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; id?: string }) {
+export default function AppCheckbox({ className, partiallyChecked, children, checked, onChange, id }: { className?: string; partiallyChecked?: boolean; children?: any; checked?: boolean; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; id: string }) {
 
   const classesByState = {
     unchecked: 'border border-gray-300 bg-white',
