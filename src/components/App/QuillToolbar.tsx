@@ -81,11 +81,11 @@ export const modules = {
           })
 
           console.log({
-            data: data?.data,
+            data: data,
           })
 
           this.quill.deleteText(selection.index, selection.length, "user");
-          this.quill.insertText(selection.index, data?.data?.content, "user");
+          this.quill.insertText(selection.index, data?.content, "user");
 
         }
       },
