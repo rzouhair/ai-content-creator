@@ -19,7 +19,7 @@ export const getDocuments = async (project?: string): Promise<Document[] | undef
 
 export const getDocumentById = async (id: string): Promise<Document | undefined> => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/`);
+    const res = await fetch(`${apiUrl}${id}/`);
     if (!res.ok) {
       // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
       throw new Error(`Request failed with status ${res.status}`);
@@ -57,7 +57,7 @@ export const createDocument = async (payload: {
 
 export const updateDocument = async (id: string, payload: any) => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/`, {
+    const res = await fetch(`${apiUrl}${id}/`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export const updateDocument = async (id: string, payload: any) => {
 
 export const deleteDocument = async (id: string) => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/`, {
+    const res = await fetch(`${apiUrl}${id}/`, {
       method: 'DELETE',
     });
     if (!res.ok) {

@@ -1,6 +1,6 @@
 import { Output } from "@/lib/@types";
 
-const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/outputs/`;
+const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/outputs`;
 
 export const getOutputs = async (): Promise<Output[] | undefined> => {
   try {
