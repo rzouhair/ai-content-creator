@@ -1,6 +1,5 @@
 import { Output } from '@/lib/@types'
-import axiosInstance from '@/lib/axios';
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

@@ -1,6 +1,4 @@
-import { Document, Project } from "@/lib/@types";
-import axiosInstance from "@/lib/axios";
-import { AxiosResponse } from "axios";
+import { Project } from "@/lib/@types";
 
 export const getProjects = async (): Promise<Project[] | undefined> => {
   try {

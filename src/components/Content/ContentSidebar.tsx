@@ -1,15 +1,11 @@
 import { Skill, Tag } from "@/lib/@types";
-import axiosInstance from "@/lib/axios";
 import { skills as skillsAtom } from "@/stores/templates";
 import { sideBarTheme } from "@/stores/theme";
 import { useAtom } from "jotai";
-import ReactMarkdown from 'react-markdown'
 import React, { useCallback, useEffect, useState } from "react";
 import SkillItem from "./ContentTemplates/SkillItem";
 import SkillForm from "./ContentTemplates/SkillForm";
-import Image from "next/image";
 import ContentOutput from "./ContentOutput";
-import openai from "openai";
 
 function ContentSidebar() {
   const [theme] = useAtom(sideBarTheme)
@@ -24,19 +20,24 @@ function ContentSidebar() {
   const fetchOutputs = useCallback(async () => {
     try {
       if (!selectedSkill) {
-        setGeneratedData(null)
-        return
+        setGeneratedData([]);
+        return;
       }
 
-      const outputs = await axiosInstance.get('/content-gen/skills/' + selectedSkill._id + '/outputs/')
-
-      setGeneratedData([
-        ...outputs.data,
-      ])
-    } catch (error) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/${selectedSkill._id}/outputs/`);
       
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const outputs = await response.json();
+
+      setGeneratedData(outputs);
+    } catch (error) {
+      console.error('Error fetching outputs:', error);
+      // Handle the error or display an error message to the user if needed.
     }
-  }, [selectedSkill])
+  }, [selectedSkill]);
 
 
   useEffect(() => {

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import AppNav from '../App/AppNav/AppNav'
 import { useAtom } from 'jotai'
 import { sideBarTheme } from '@/stores/theme'
-import axiosInstance from '@/lib/axios'
 import { setSkills, skills } from '@/stores/templates'
 import { Skill } from '@/lib/@types'
 
@@ -21,46 +20,63 @@ function LayoutMain(props: any) {
   useEffect(() => {
     /* async function fetchSkills() {
       try {
-        const tagsObj = Array.from(new Set(skillsObj.map((s) => s.tags.split(',')).flat(Infinity).filter((t: string) => t !== '')))
+        const tagsObj = Array.from(new Set(skillsObj.map((s) => s.tags.split(',')).flat(Infinity).filter((t: string) => t !== '')));
 
-        const tagsPromises = await Promise.all(tagsObj.map((t) => axiosInstance.post('/content-gen/tags/', {
-          name: t
-        })))
+        const tagsPromises = await Promise.all(tagsObj.map((t) => fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/tags/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: t,
+          }),
+        })));
 
-        const { data: tags } = await axiosInstance.get('/content-gen/tags/')
+        const tagsResponses = await Promise.all(tagsPromises);
+        const tags = await Promise.all(tagsResponses.map(response => response.json()));
 
-        let sks = skillsObj
+        let sks = skillsObj;
 
         sks = sks.map((skill) => {
-          delete skill.favoriteSkills_aggregate
-          delete skill.id
-          delete skill.improved
-          delete skill.updated_at
+          delete skill.favoriteSkills_aggregate;
+          delete skill.id;
+          delete skill.improved;
+          delete skill.updated_at;
 
-          skill.tags = skill.tags?.split(',').filter((t) => t !== '' || t !== ' ').map((t) => tags.find((tg) => tg.name === t)?._id).filter((t) => !!t)
+          skill.tags = skill.tags?.split(',').filter((t) => t !== '' || t !== ' ').map((t) => tags.find((tg) => tg.name === t)?._id).filter((t) => !!t);
 
-          console.log(skill.tags)
+          console.log(skill.tags);
 
-          return skill
-        })
+          return skill;
+        });
 
-        const res = await Promise.all(sks.map((s) => axiosInstance.post('/content-gen/skills/', s)))
+        const skillsPromises = await Promise.all(sks.map((s) => fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(s),
+        })));
 
-        console.log({ res, skillsObj })
+        const skillsResponses = await Promise.all(skillsPromises);
+        const results = await Promise.all(skillsResponses.map(response => response.json()));
 
-
+        console.log({ results, skillsObj });
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
-    } */
+    }} */
 
     async function fetchSkills() {
       try {
-        const res: { data: Skill[] } = await axiosInstance.get('/content-gen/skills/')
-        _setSkills(res.data)
-
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/`);
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        _setSkills(data);
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
 
