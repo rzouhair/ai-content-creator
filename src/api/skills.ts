@@ -1,44 +1,28 @@
-export const executeSkill = async (payload: {
+import axiosInstance from "@/lib/axios";
+import { AxiosResponse } from "axios";
+
+export const executeSkill = async(payload: {
   skill_id: string;
-  inputs: any;
+  inputs: any
 }) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/execute/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error(error);
-  }
-};
+    const res = await axiosInstance.post('/content-gen/execute/', payload)
 
-export const getCompletion = async (payload: {
+    return res.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export const getCompletion = async(payload: {
   command: string;
   context: string;
-}): Promise<Response | undefined> => {
+}): Promise<AxiosResponse<any, any> | undefined> => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/completion/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    return res;
+    const data = await axiosInstance.post('/content-gen/completion/', payload)
+
+    return data
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
-};
+}
