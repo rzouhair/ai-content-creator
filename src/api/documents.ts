@@ -1,55 +1,88 @@
 import { Document } from "@/lib/@types";
-import axiosInstance from "@/lib/axios";
-import { AxiosResponse } from "axios";
 
-export const getDocuments = async(project?: string): Promise<Document[] | undefined> => {
+const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/documents/`;
+
+export const getDocuments = async (project?: string): Promise<Document[] | undefined> => {
   try {
-    const res = await axiosInstance.get('/content-gen/documents/', {
-      params: {
-        ...(project ? { project } : {})
-      }
-    })
-    return res?.data || []
+    const params = new URLSearchParams(project ? { project } : {});
+    const res = await fetch(`${apiUrl}?${params.toString()}`);
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+    const data = await res.json();
+    return data || [];
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
-export const getDocumentById = async(id: string): Promise<Document | undefined> => {
+export const getDocumentById = async (id: string): Promise<Document | undefined> => {
   try {
-    const res = await axiosInstance.get(`/content-gen/documents/${id}/`)
-    return res.data
+    const res = await fetch(`${apiUrl}/${id}/`);
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+    const data = await res.json();
+    return data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
-export const createDocument = async(payload: {
-  content: string
-  delta?: object
+export const createDocument = async (payload: {
+  content: string;
+  delta?: object;
   name: string;
   status: string;
   project: string;
 }) => {
   try {
-    await axiosInstance.post(`/content-gen/documents/`, payload)
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
-export const updateDocument = async(id: string, payload: any) => {
+export const updateDocument = async (id: string, payload: any) => {
   try {
-    await axiosInstance.put(`/content-gen/documents/${id}/`, payload)
+    const res = await fetch(`${apiUrl}/${id}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
-export const deleteDocument = async(id: string) => {
+export const deleteDocument = async (id: string) => {
   try {
-    await axiosInstance.delete(`/content-gen/documents/${id}/`)
+    const res = await fetch(`${apiUrl}/${id}/`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
