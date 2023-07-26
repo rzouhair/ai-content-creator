@@ -95,6 +95,21 @@ export const modules = {
     delay: 500,
     maxStack: 100,
     userOnly: true
+  },
+  QuillMarkdown: {
+    ignoreTags: [ 'pre', 'strikethrough'], // @option - if you need to ignore some tags.
+    
+    tags: { // @option if you need to change for trigger pattern for some tags. 
+      blockquote: {
+        pattern: /^(\|){1,6}\s/g,
+      },
+      bold: {
+        pattern:  /^(\|){1,6}\s/g,
+      },
+      italic: {
+        pattern: /(\_){1}(.+?)(?:\1){1}/g,
+      },
+    },
   }
 };
 

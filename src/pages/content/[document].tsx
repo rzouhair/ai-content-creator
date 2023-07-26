@@ -1,6 +1,7 @@
 import { getDocumentById, updateDocument } from "@/api/documents";
 import AppButton from "@/components/App/AppButton";
 import QuillToolbar, { modules, formats } from "@/components/App/QuillToolbar";
+import QuillMarkdown from 'quilljs-markdown'
 import ContentSidebar from "@/components/Content/ContentSidebar";
 import ContentStructure from "@/components/Content/ContentStructure";
 import LayoutMain from "@/components/Layouts/LayoutMain";
@@ -37,6 +38,11 @@ function ContentDocument() {
             icons.header["3"] = '<i class="text-2xl h-[18px] i-tabler-h-3" />';
             icons.header["4"] = '<i class="text-2xl h-[18px] i-tabler-h-4" />';
           }
+          console.log({
+            quill: quill.Quill
+          })
+
+          quill.Quill.register?.('modules/QuillMarkdown', QuillMarkdown, true)
 
           return quill;
         })()

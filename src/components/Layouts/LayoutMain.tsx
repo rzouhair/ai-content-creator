@@ -50,13 +50,13 @@ function LayoutMain(props: any) {
           return skill;
         });
 
-        const skillsPromises = await Promise.all(sks.map((s) => fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/`, {
+        const skillsPromises = sks.map((s) => fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(s),
-        })));
+        }));
 
         const skillsResponses = await Promise.all(skillsPromises);
         const results = await Promise.all(skillsResponses.map(response => response.json()));
@@ -65,7 +65,7 @@ function LayoutMain(props: any) {
       } catch (error) {
         console.error(error);
       }
-    }} */
+    } */
 
     async function fetchSkills() {
       try {

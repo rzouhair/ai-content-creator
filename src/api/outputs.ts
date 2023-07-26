@@ -1,5 +1,6 @@
 import { Output } from "@/lib/@types";
 
+const rawApiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen`;
 const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/outputs`;
 
 export const getOutputs = async (): Promise<Output[] | undefined> => {
@@ -75,6 +76,54 @@ export const deleteOutput = async (id: string) => {
       // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
       throw new Error(`Request failed with status ${res.status}`);
     }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const extractTranscript = async (payload: {
+  id: string
+  raw_text?: boolean
+}) => {
+  try {
+    const res = await fetch(`${rawApiUrl}/extract/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+export const extractTranscriptInfo = async (payload: {
+  transcript: string
+}) => {
+  try {
+    const res = await fetch(`${rawApiUrl}/extract/analyze/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data;
   } catch (error) {
     console.error(error);
   }

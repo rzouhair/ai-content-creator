@@ -25,6 +25,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
     },
     { to: "/ideation", icon: "i-tabler-bulb", title: "Ideation" },
     { to: "/chat", icon: "i-tabler-message", title: "Chat" },
+    { to: "/video-extractor", icon: "i-tabler-brand-youtube", title: "Youtube extractor" },
     /* { to: '/tasks', icon: 'i-tabler-checkup-list', title: 'Tasks' },
     { to: '/reporting', icon: 'i-tabler-chart-pie', title: 'Reporting' },
     { to: '/users', icon: 'i-tabler-users', title: 'Users' }, */
