@@ -17,6 +17,7 @@ import AppTable from '@/components/App/AppTable'
 import AppTag from '@/components/App/AppTag'
 import AppTooltip from '@/components/App/AppTooltip'
 import { deleteSuggestion, getSuggestions } from '@/api/suggestions'
+import AppTabs from '@/components/App/AppTabs'
 
 function KeywordResearch() {
 
@@ -30,7 +31,9 @@ function KeywordResearch() {
 
   const [selectedSuggestions, setSelectedSuggestions] = useState<Suggestion[]>([])
 
-  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [googleSuggestions, setGoogleSuggestions] = useState<string[]>([])
+  const [bingSuggestions, setBingSuggestions] = useState<string[]>([])
+  const [ddgSuggestions, setDdgSuggestions] = useState<string[]>([])
   const [groupedSuggestions, setGroupedSuggestions] = useState([])
 
   const changeHandler = async(e: any) => {
@@ -51,14 +54,14 @@ function KeywordResearch() {
     }
   }
 
-  const selectSuggestion = async(i: number) => {
+  const selectSuggestion = async(source: string[], i: number) => {
 
     try {
       if (!project?._id)
         return
       const data = {
         parent_keyword: keyword,
-        search_query: suggestions[i].replaceAll(/<\/?b>/g, ""),
+        search_query: source[i].replaceAll(/<\/?b>/g, ""),
         project: project?._id
       }
       const res = await axios.post('/keyword-research/suggestions/', data)
@@ -122,15 +125,24 @@ function KeywordResearch() {
   
         setLoading(true)
         axios.post('/keyword-research/suggest/', data).then((res) => {
-          setSuggestions(keyword ? [
+          setGoogleSuggestions(keyword ? [
             keyword,
-            ...res.data,
+            ...res.data.google,
+          ] : [])
+          setBingSuggestions(keyword ? [
+            keyword,
+            ...res.data.bing,
+          ] : [])
+          setDdgSuggestions(keyword ? [
+            keyword,
+            ...res.data.ddg,
           ] : [])
         }).finally(() => {
           setLoading(false)
         })
       } else {
-        setSuggestions([])
+        setGoogleSuggestions([])
+        setBingSuggestions([])
       }
     } catch (error) {
       
@@ -216,6 +228,93 @@ function KeywordResearch() {
     },
   ], [])
 
+  const tabs = {
+    'Google': () => (
+      <div>
+        {
+          googleSuggestions?.length > 0 && (
+            <div className='mt-2 py-3 '>
+              <ul className="rounded-md flex gap-2 flex-col">
+                {
+                  googleSuggestions?.length ?
+                    googleSuggestions.map((s, i) =>
+                      <li
+                        key={i}
+                        className={"bg-gray-100 hover:bg-gray-200 transition-colors rounded-sm cursor-pointer px-2 py-3"} dangerouslySetInnerHTML={{
+                          __html: s
+                        }}
+                        onClick={(e) => selectSuggestion(googleSuggestions, i)}
+                      />
+                    )
+                  : null
+                }
+              </ul>
+              <AppButton prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
+                Reset
+              </AppButton>
+            </div>
+          )
+        }
+      </div>
+    ),
+    "Bing": () => (
+      <div>
+        {
+          bingSuggestions?.length > 0 && (
+            <div className='mt-2 py-3 '>
+              <ul className="rounded-md flex gap-2 flex-col">
+                {
+                  bingSuggestions?.length ?
+                    bingSuggestions.map((s, i) =>
+                      <li
+                        key={i}
+                        className={"bg-gray-100 hover:bg-gray-200 transition-colors rounded-sm cursor-pointer px-2 py-3"} dangerouslySetInnerHTML={{
+                          __html: s
+                        }}
+                        onClick={(e) => selectSuggestion(bingSuggestions, i)}
+                      />
+                    )
+                  : null
+                }
+              </ul>
+              <AppButton prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
+                Reset
+              </AppButton>
+            </div>
+          )
+        }
+      </div>
+    ),
+    "DDG": () => (
+      <div>
+        {
+          ddgSuggestions?.length > 0 && (
+            <div className='mt-2 py-3 '>
+              <ul className="rounded-md flex gap-2 flex-col">
+                {
+                  ddgSuggestions?.length ?
+                    ddgSuggestions.map((s, i) =>
+                      <li
+                        key={i}
+                        className={"bg-gray-100 hover:bg-gray-200 transition-colors rounded-sm cursor-pointer px-2 py-3"} dangerouslySetInnerHTML={{
+                          __html: s
+                        }}
+                        onClick={(e) => selectSuggestion(ddgSuggestions, i)}
+                      />
+                    )
+                  : null
+                }
+              </ul>
+              <AppButton prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
+                Reset
+              </AppButton>
+            </div>
+          )
+        }
+      </div>
+    ),
+  }
+
   return (
     <div className='p-4 relative'>
       <div className='mb-8'>
@@ -245,32 +344,11 @@ function KeywordResearch() {
           </div>
 
         </AppCard>
-        <div className='absolute max-w-2xl bg-white z-10 -mt-3 mx-auto w-full left-0 right-0 align-middle shadow-[0px_1px_3px_#1018282A]'>
-          {
-            suggestions?.length > 0 && (
-              <div className='mt-2 px-4 py-3 '>
-                <ul className="rounded-md flex gap-2 flex-col">
-                  {
-                    suggestions?.length ?
-                      suggestions.map((s, i) =>
-                        <li
-                          key={i}
-                          className={"bg-gray-100 hover:bg-gray-200 transition-colors rounded-sm cursor-pointer px-2 py-3"} dangerouslySetInnerHTML={{
-                            __html: s
-                          }}
-                          onClick={(e) => selectSuggestion(i)}
-                        />
-                      )
-                    : null
-                  }
-                </ul>
-                <AppButton prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
-                  Reset
-                </AppButton>
-              </div>
-            )
-          }
-        </div>
+        {
+          keyword && <div className='absolute max-w-2xl bg-white z-10 -mt-3 px-4 mx-auto w-full left-0 right-0 align-middle shadow-[0px_1px_3px_#1018282A]'>
+            <AppTabs tabs={tabs} />
+          </div>
+        }
       </div>
       <div className='flex flex-col gap-4 my-4'>
         <AppTable
