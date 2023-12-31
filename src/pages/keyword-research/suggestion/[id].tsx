@@ -1,4 +1,4 @@
-import AppButton from "@/components/App/AppButton";
+import { Button } from '@/components/ui/button'
 import AppTable from "@/components/App/AppTable";
 import AppTabs from "@/components/App/AppTabs";
 import AppTag from "@/components/App/AppTag";

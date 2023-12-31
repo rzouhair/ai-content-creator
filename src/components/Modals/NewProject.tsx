@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import ModalBase from './ModalBase'
 import characters from '@/lib/characters'
-import AppButton from '../App/AppButton'
+import { Button } from '@/components/ui/button'
 import AppInput from '../App/AppInput'
 import AppTextarea from '../App/AppTextArea'
 import { createProject, getProjects } from '@/api/projects'
@@ -70,8 +70,8 @@ function SystemPromptModal(props: any) {
       </div>
 
       <div className='flex items-center justify-end gap-4 mt-4'>
-        <AppButton onClick={(e) => props.onClose(false)} background='light' text='black'>Cancel</AppButton>
-        <AppButton onClick={(e) => saveProject()}>Save Project</AppButton>
+        <Button onClick={(e) => props.onClose(false)} background='light' text='black'>Cancel</Button>
+        <Button onClick={(e) => saveProject()}>Save Project</Button>
       </div>
     </ModalBase>
   )

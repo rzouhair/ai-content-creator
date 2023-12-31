@@ -1,20 +1,20 @@
 import React, { Fragment, useState } from "react";
-import AppNavItem from "./AppNavItem";
+import { AppNavItem } from "./AppNavItem";
 import { useAtom } from "jotai";
 import { setSidebarTheme, sideBarTheme } from "@/stores/theme";
 import { Menu, Transition } from "@headlessui/react";
 import Link from "next/link";
 import AppProjects from "@/components/App/AppNav/AppProjects";
+import { NavLink } from "@/components/App/AppNav/AppNavItem";
 
 function AppNav(props: { navCollapsed?: boolean }) {
   const [theme] = useAtom(sideBarTheme);
   const [, setSideTheme] = useAtom(setSidebarTheme);
 
-  const [navItems] = useState([
+  const [navItems] = useState<NavLink[]>([
     {
       to: "/",
       icon: "i-tabler-home",
-      positionBasedOnSeparator: "before",
       title: "Home",
     },
     { to: "/content", icon: "i-tabler-pencil", title: "Content editor" },
@@ -24,6 +24,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
       title: "Keyword research",
     },
     { to: "/ideation", icon: "i-tabler-bulb", title: "Ideation" },
+    { to: "/clustering", icon: "i-tabler-filters", title: "Keywords Clustering" },
     { to: "/chat", icon: "i-tabler-message", title: "Chat" },
     { to: "/video-extractor", icon: "i-tabler-brand-youtube", title: "Youtube extractor" },
     /* { to: '/tasks', icon: 'i-tabler-checkup-list', title: 'Tasks' },
@@ -31,17 +32,15 @@ function AppNav(props: { navCollapsed?: boolean }) {
     { to: '/users', icon: 'i-tabler-users', title: 'Users' }, */
   ]);
 
-  const [bottomNavItems] = useState([
+  const [bottomNavItems] = useState<NavLink[]>([
     {
       to: "/support",
       icon: "i-tabler-lifebuoy",
-      positionBasedOnSeparator: "after",
       title: "Support",
     },
     {
       to: "/settings",
       icon: "i-tabler-settings",
-      positionBasedOnSeparator: "after",
       title: "Settings",
     },
   ]);
@@ -58,37 +57,29 @@ function AppNav(props: { navCollapsed?: boolean }) {
       <nav
         className={`${
           (theme as string) === "dark" ? "bg-gray-900" : "bg-white"
-        } w-full h-full px-4 py-8 flex flex-col gap-1 ${
+        } w-full h-full py-8 flex flex-col gap-1 ${
           props.navCollapsed ?? "items-center"
         }`}
       >
         <div className="font-bold text-2xl mb-3 text-white text-center h-8 w-8 bg-gray-700 rounded-lg mx-auto"></div>
 
-        <AppProjects navCollapsed={props.navCollapsed} />
+        <div className="w-full px-4">
+          <AppProjects navCollapsed={props.navCollapsed} />
+        </div>
 
-        {navItems.map((item, index) => (
-          <AppNavItem
-            key={index}
-            collapsed={props.navCollapsed}
-            color={theme}
-            icon={item.icon}
-            title={item.title}
-            to={item.to}
-          />
-        ))}
+        <AppNavItem
+          className="flex-1 w-full"
+          isCollapsed={!!props.navCollapsed}
+          links={navItems}
+        />
         <div className="flex-1"></div>
-        {bottomNavItems.map((item, index) => (
-          <AppNavItem
-            key={index}
-            collapsed={props.navCollapsed}
-            color={theme}
-            icon={item.icon}
-            title={item.title}
-            to={item.to}
-          />
-        ))}
+        <AppNavItem
+          className="flex-1 w-full justify-end"
+          isCollapsed={!!props.navCollapsed}
+          links={bottomNavItems}
+        />
 
-        {!props.navCollapsed && (
+        {/* {!props.navCollapsed && (
           <div
             className={`${
               (theme as string) === "dark"
@@ -99,7 +90,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
             <p className="mb-2 font-semibold ">Used space</p>
             <p>Your team has used 80% of your available space. Need more?</p>
           </div>
-        )}
+        )} */}
         <span className={`flex items-center justify-center`}>
           <i
             className={`${

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 // @ts-ignore
 import { debounce } from 'lodash-es'
+import { Input } from '../ui/input';
 
 const AppNumberInput = ({
   label,
@@ -79,9 +80,13 @@ const AppNumberInput = ({
   return (
     <div>
       <label htmlFor={rest.id} className="text-base font-semibold">{label}</label>
-      <div className={`${wrapperClassName || ''} dark:text-white mt-1.5 box-border flex flex-row items-center px-2 gap-2 h-10 transition-all bg-white dark:bg-gray-700 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 dark:border-gray-600 hover:border-${color}-300 hover:border-${color}-600 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_3px_#F2F4F7]`}`}>
-        {prefix || null}
-        <input
+      <div className={`${wrapperClassName || ''} dark:text-white mt-1.5 flex flex-row items-center h-10 transition-all bg-white dark:bg-night-500 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `!shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}`}>
+        {
+          prefix && <div className="pl-2 flex items-center">
+            {prefix}
+          </div>
+        }
+        <Input
           type={type === 'password' ? 'password' : 'text'}
           ref={inputRef}
           placeholder={placeholder}
@@ -90,11 +95,15 @@ const AppNumberInput = ({
           onChange={debounced ? debouncedChangeHandler : handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
-          className={`outline-none flex-1 text-base w-full bg-transparent ${className}`}
+          className={`outline-none flex-1 text-base w-full bg-transparent border-none focus-visible:ring-none focus-visible:ring-transparent focus-visible:ring-offset-0 ${focused && 'outline-none'} ${className}`}
           {...(debounced ? {} : { value })}
           {...rest}
         />
-        {suffix || null}
+        {
+          suffix && <div className="pr-2 flex items-center">
+            {suffix}
+          </div>
+        }
       </div>
       <div className={`${invalid ? '!text-red-600' : `text-gray-600`} text-sm mt-1 ${hintClassName}`}>
         { hint || errorMessage }

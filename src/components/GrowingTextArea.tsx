@@ -27,7 +27,7 @@ export default function GrowingTextArea(props: any) {
       name="text"
       rows={4}
       style={{ minHeight: '38px' }}
-      className={`block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:py-1.5 sm:text-sm sm:leading-6 min-h-[36px] max-h-[500px] resize-none border-light-300 px-2 ${props.loading ? 'pointer-events-none opacity-50' : ''}`}
+      className={`block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:py-1.5 sm:text-sm sm:leading-6 min-h-[36px] max-h-[300px] overflow-auto resize-none border-light-300 px-2 ${props.loading ? 'pointer-events-none opacity-50' : ''}`}
       ref={(el) => setTextArea(el)}
       value={props.value}
       onInput={(e) => {

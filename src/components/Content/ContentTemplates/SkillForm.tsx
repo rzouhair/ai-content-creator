@@ -1,4 +1,4 @@
-import AppButton from '@/components/App/AppButton'
+import { Button } from '@/components/ui/button';
 import AppNumberInput from '@/components/App/AppNumberInput'
 import AppInput from '@/components/App/AppInput'
 import AppTextarea from '@/components/App/AppTextArea'
@@ -13,6 +13,7 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
   const [value, setValue] = useState<any>(null)
 
   const [numOfOutputs, setNumOfOutputs] = useState<number>(1)
+  const [language, setLanguage] = useState('English')
 
   const [icon, setIcon] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -20,7 +21,7 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
   const resetForm = useCallback(() => {
     const obj: any = {}
     skill.input_schema.forEach((i: InputSchema) => {
-      obj[i.id] = ""
+      obj[i.id] = i.default || ''
     })
     setValue(obj)
   }, [skill])
@@ -122,7 +123,7 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
                 })
               }
             </div>
-            <div className='mt-8'>
+            <div className='mt-4'>
               <AppNumberInput
                 minLength={1}
                 value={numOfOutputs}
@@ -133,8 +134,8 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
               />
             </div>
             <div className='flex items-center justify-between gap-4'>
-              <AppButton background='purple' loading={loading} className='flex-1 mt-4 mb-2' onClick={() => resetForm()}>Clear inputs</AppButton>
-              <AppButton className='flex-1 mt-4 mb-2' loading={loading} onClick={(e) => generateOutput()}>Generate</AppButton>
+              <Button background='purple' loading={loading} className='flex-1 mt-4 mb-2' onClick={() => resetForm()}>Clear inputs</Button>
+              <Button className='flex-1 mt-4 mb-2' loading={loading} onClick={(e) => generateOutput()}>Generate</Button>
             </div>
           </div>
         )

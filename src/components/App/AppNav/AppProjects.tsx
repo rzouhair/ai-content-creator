@@ -37,7 +37,7 @@ function AppProjects(props: any) {
       <Menu as="div" className="relative inline-block text-left w-full">
         <div>
           <Menu.Button
-            className={`group mb-2 flex items-center truncate w-full px-4 py-2 rounded-lg selectionRing hover:ring-gray-300 hover:bg-gray-100 bg-gray-50 ring-1 ring-gray-200 ${props.navCollapsed ? 'justify-center' : 'justify-between'}`}
+            className={`group mb-2 flex items-center truncate w-full px-4 py-2 rounded-lg selectionRing hover:ring-gray-300 hover:bg-gray-100 bg-gray-50 ring-1 ring-gray-200 dark:bg-muted dark:hover:bg-muted/70 transition-100 dark:text-white dark:ring-muted-foreground/30 ${props.navCollapsed ? 'justify-center' : 'justify-between'}`}
             aria-label="Select a project"
           >
             <span className={`${props.navCollapsed ? 'hidden' : 'block'} items-start truncate`}>

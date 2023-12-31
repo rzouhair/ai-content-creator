@@ -1,4 +1,4 @@
-import AppButton from '@/components/App/AppButton'
+import { Button } from '@/components/ui/button';
 import AppCard from '@/components/App/AppCard'
 import AppInput from '@/components/App/AppInput'
 import LayoutMain from '@/components/Layouts/LayoutMain'
@@ -10,7 +10,6 @@ import { Project, Suggestion } from '@/lib/@types'
 import { useRouter } from 'next/router'
 // @ts-ignore
 import { groupBy } from 'lodash-es'
-import AppAccordion from '@/components/App/AppAccordion'
 import { useAtom } from 'jotai'
 import { activeProject } from '@/stores/projects'
 import AppTable from '@/components/App/AppTable'
@@ -18,6 +17,15 @@ import AppTag from '@/components/App/AppTag'
 import AppTooltip from '@/components/App/AppTooltip'
 import { deleteSuggestion, getSuggestions } from '@/api/suggestions'
 import AppTabs from '@/components/App/AppTabs'
+import AppListbox from '@/components/App/AppListbox'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 function KeywordResearch() {
 
@@ -31,6 +39,7 @@ function KeywordResearch() {
 
   const [selectedSuggestions, setSelectedSuggestions] = useState<Suggestion[]>([])
 
+  const [country, setCountry] = useState<string>('us')
   const [googleSuggestions, setGoogleSuggestions] = useState<string[]>([])
   const [bingSuggestions, setBingSuggestions] = useState<string[]>([])
   const [ddgSuggestions, setDdgSuggestions] = useState<string[]>([])
@@ -120,6 +129,7 @@ function KeywordResearch() {
       if (keyword) {
         const data = {
           query: keyword,
+          country,
           with_styling: checked
         }
   
@@ -147,7 +157,7 @@ function KeywordResearch() {
     } catch (error) {
       
     }
-  }, [keyword, checked])
+  }, [keyword, checked, country])
 
 
   const columns = React.useMemo(() => [
@@ -184,26 +194,23 @@ function KeywordResearch() {
               <div>
                 {
                   sgs.status !== 'ANALYZED' &&
-                    <AppButton
-                      size='md'
-                      square={true}
+                    <Button
                       disabled={sgs.status === 'IN_PROGRESS'}
-                      background={sgs.status === 'IN_PROGRESS' ? 'yellow' : 'orange'}
+                      size='icon'
+                      /* background={sgs.status === 'IN_PROGRESS' ? 'yellow' : 'orange'} */
                       onClick={(e) => analyzeSerps(sgs._id)}
                     >
                       <i className={`${sgs.status === 'IN_PROGRESS' ? 'i-tabler-loader animate-spin' : 'i-tabler-analyze'} text-white text-xl`}></i>
-                    </AppButton>
+                    </Button>
                 }
                 {
                   sgs.status === 'ANALYZED' &&
-                    <AppButton
+                    <Button
                       onClick={(e) => getSearch(sgs._id)}
-                      background="blue"
-                      square={true}
-                      size='md'
+                      size='icon'
                     >
                       <i className='i-tabler-device-analytics text-white text-xl'></i>
-                    </AppButton>
+                    </Button>
                 }
               </div>
             </AppTooltip>
@@ -212,14 +219,13 @@ function KeywordResearch() {
               sgs.status !== 'IN_PROGRESS' && <AppTooltip content={
                 <p>Delete suggestion</p>
               }>
-                <AppButton
-                  size='md'
-                  square={true}
-                  background="red"
+                <Button
+                  size='icon'
+                  variant="destructive"
                   onClick={(e) => delSuggestion(sgs._id)}
                 >
                   <i className={`i-tabler-trash text-white text-xl`}></i>
-                </AppButton>
+                </Button>
               </AppTooltip>
             }
           </div>
@@ -249,9 +255,9 @@ function KeywordResearch() {
                   : null
                 }
               </ul>
-              <AppButton prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
+              <Button prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
                 Reset
-              </AppButton>
+              </Button>
             </div>
           )
         }
@@ -277,9 +283,9 @@ function KeywordResearch() {
                   : null
                 }
               </ul>
-              <AppButton prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
+              <Button prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
                 Reset
-              </AppButton>
+              </Button>
             </div>
           )
         }
@@ -305,9 +311,9 @@ function KeywordResearch() {
                   : null
                 }
               </ul>
-              <AppButton prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
+              <Button prefixIcon="i-tabler-reload" className='mt-4' onClick={() => setKeyword("")}>
                 Reset
-              </AppButton>
+              </Button>
             </div>
           )
         }
@@ -316,36 +322,52 @@ function KeywordResearch() {
   }
 
   return (
-    <div className='p-4 relative'>
-      <div className='mb-8'>
-        <h1 className='font-bold'>Keyword research</h1>
-        <p>Discover dozens of relevant keyword clusters in a matter of minutes</p>
-      </div>
+    <div className='p-4 relative bg-background'>
       <div className='relative'>
-        <AppCard className={'max-w-2xl mx-auto'}>
-          <AppInput
-            placeholder='e.g. Best SEO tool'
-            hint='Only one keyword can be added'
-            label="Keyword"
-            prefix={<i className='i-tabler-key'></i>}
-            value={keyword}
-            debounced={true}
-            debounceTime={750}
-            onChange={changeHandler}
-            suffix={loading ? <i className="i-tabler-loader"></i> : undefined}
-          />
-          <div className='border-t border-dashed border-gray-400 mt-6 pt-3'>
-            <AppCheckbox checked={checked} id={'with-styling'} onChange={(e) => {
-              setChecked(e.target.checked)
-            }}>
-              Get suggestions with styling
-            </AppCheckbox>
-            {/* <AppButton className='ml-auto mr-0' prefixIcon='i-tabler-search'>Search</AppButton> */}
-          </div>
+        <Card className={'max-w-2xl mx-auto z-20 relative overflow-visible'}>
+          <CardHeader>
+            <CardTitle className='font-bold'>Keyword research</CardTitle>
+            <CardDescription>Discover dozens of relevant keyword clusters in a matter of minutes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AppInput
+              placeholder='e.g. Best SEO tool'
+              hint='Only one keyword can be added'
+              label="Keyword"
+              prefix={<i className='i-tabler-key'></i>}
+              value={keyword}
+              debounced={true}
+              debounceTime={750}
+              onChange={changeHandler}
+              suffix={loading ? <i className="i-tabler-loader"></i> : undefined}
+            />
 
-        </AppCard>
+          <div className={'bg-gray-50 dark:bg-muted-foreground/10 ring-1 ring-muted rounded-md p-4 my-4 relative z-20'}>
+            <AppListbox
+              value={country}
+              label='Language'
+              options={[
+                { label: 'United States', value: 'us' },
+                { label: 'Morocco', value: 'ma' },
+                { label: 'France', value: 'fr' },
+                { label: 'Spain', value: 'es' },
+              ]}
+              onChange={(selected: string) => setCountry(selected)}
+            />
+          </div>
+            <div className='border-t border-dashed border-gray-400 my-6 pt-3'>
+              <AppCheckbox checked={checked} id={'with-styling'} onChange={(e) => {
+                setChecked(e.target.checked)
+              }}>
+                Get suggestions with styling
+              </AppCheckbox>
+              {/* <Button className='ml-auto mr-0' prefixIcon='i-tabler-search'>Search</Button> */}
+            </div>
+          </CardContent>
+
+        </Card>
         {
-          keyword && <div className='absolute max-w-2xl bg-white z-10 -mt-3 px-4 mx-auto w-full left-0 right-0 align-middle shadow-[0px_1px_3px_#1018282A]'>
+          keyword && <div className='absolute max-w-2xl bg-white z-30 -mt-3 px-4 mx-auto w-full left-0 right-0 align-middle shadow-[0px_1px_3px_#1018282A]'>
             <AppTabs tabs={tabs} />
           </div>
         }

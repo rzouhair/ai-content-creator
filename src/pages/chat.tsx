@@ -5,8 +5,6 @@ import remarkGfm from 'remark-gfm'
 // @ts-ignore
 import { SSE } from 'sse.js'
 
-import { Button, TextInput } from '@tremor/react'
-
 import { Chat, createChat, currentChat as currentChatAtom, newChatAtom, setCurrentChat as setCurrentChatAtom, setNewChatAtom, updateChat as updateChatAtom } from '@/stores/messages'
 
 import openai from '@/lib/openai'
@@ -19,7 +17,7 @@ import ChatSidebar from '@/components/Chat/ChatSidebar'
 import { useAtom } from 'jotai'
 import ChatAssistantLoading from '@/components/Chat/ChatAssistantLoading'
 import LayoutMain from '@/components/Layouts/LayoutMain'
-import AppButton from '@/components/App/AppButton'
+import { Button } from '@/components/ui/button';
 import AppTextArea from '@/components/App/AppTextArea'
 import ChatHeader from '@/components/Chat/ChatHeader'
 
@@ -91,7 +89,7 @@ async function loadAnswer(mAppended: any) {
     if (isStream) {
       const url = "https://api.openai.com/v1/chat/completions"
       const data = {
-        model: 'gpt-3.5-turbo-0301',
+        model: 'gpt-3.5-turbo-1106',
         messages: (currentChat?.exceededMaxTokens) ? [systemPrompt, ...mAppended.slice(-10)] : mAppended as any,
         stream: true,
       }
@@ -170,7 +168,7 @@ async function loadAnswer(mAppended: any) {
       })
     } else {
       const response = await openai.createChatCompletion({
-        model: 'gpt-3.5-turbo-0301',
+        model: 'gpt-3.5-turbo-1106',
         messages: (currentChat?.exceededMaxTokens) ? mAppended.slice(-10).unshift(systemPrompt) : mAppended as any,
         stream: true,
       }, { responseType: 'stream' })
@@ -250,7 +248,7 @@ async function loadAnswer(mAppended: any) {
       scrollDown()
       if (currentChat?.messages) {
         const response = await openai.createChatCompletion({
-          model: 'gpt-3.5-turbo-0301',
+          model: 'gpt-3.5-turbo-1106',
           messages: currentChat?.messages,
         })
         const newMessage = response.data.choices[0].message 
@@ -329,21 +327,21 @@ async function loadAnswer(mAppended: any) {
           <div className="sticky bottom-0 left-0 right-0 py-4 bg-white">
             {!currentChat?.messages?.length || currentChat?.messages?.length <= 0 ? (
               <div className="mb-3 flex items-center justify-center flex-wrap">
-                <AppButton onClick={() => setSystemPromptsOpen(true)}>
+                <Button onClick={() => setSystemPromptsOpen(true)}>
                   Change system prompt
-                </AppButton>
+                </Button>
               </div>
             ) : null}
 
             {currentChat?.messages?.length && currentChat?.messages?.length > 0 ? (
               <div className="mb-3 flex items-center justify-center flex-wrap">
-                {(isStream && loadingAnswer) && <AppButton background='red' prefixIcon='i-tabler-reload' disabled={!loadingAnswer} onClick={abortStream}>
+                {(isStream && loadingAnswer) && <Button background='red' prefixIcon='i-tabler-reload' disabled={!loadingAnswer} onClick={abortStream}>
                   Stop Answer
-                </AppButton>}
+                </Button>}
                 {
-                  !loadingAnswer && <AppButton background='pink' prefixIcon='i-tabler-reload' disabled={loadingAnswer} onClick={regeneateResponse}>
+                  !loadingAnswer && <Button background='pink' prefixIcon='i-tabler-reload' disabled={loadingAnswer} onClick={regeneateResponse}>
                     Regenerate response
-                  </AppButton>
+                  </Button>
                 }
               </div>
             ) : null}
@@ -361,12 +359,12 @@ async function loadAnswer(mAppended: any) {
                 }
               ></AppTextArea>
               <span className="">
-                <AppButton
+                <Button
                   disabled={!prompt || prompt === "" || prompt === "\n"}
                   onClick={onGenerateTitleClicked}
                 >
                   Submit
-                </AppButton>
+                </Button>
               </span>
             </div>
           </div>

@@ -1,8 +1,8 @@
-import { Document, Project, Search, Suggestion } from "@/lib/@types";
+import { Keywords } from "@/lib/@types";
 
-const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/keyword-research/suggestions/`;
+const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/keyword-research/keywords/`;
 
-export const getSuggestions = async (): Promise<Suggestion[] | undefined> => {
+export const getKeywordsLists = async (): Promise<Keywords[] | undefined> => {
   try {
     const res = await fetch(apiUrl);
     if (!res.ok) {
@@ -16,9 +16,9 @@ export const getSuggestions = async (): Promise<Suggestion[] | undefined> => {
   }
 };
 
-export const getSuggestionById = async (id: string): Promise<Suggestion | undefined> => {
+export const getKeywordsListById = async (id: string): Promise<Keywords | undefined> => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/`);
+    const res = await fetch(`${apiUrl}${id}/`);
     if (!res.ok) {
       // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
       throw new Error(`Request failed with status ${res.status}`);
@@ -30,21 +30,27 @@ export const getSuggestionById = async (id: string): Promise<Suggestion | undefi
   }
 };
 
-export const getSuggestionSearch = async (id: string): Promise<Search | undefined> => {
+export const clusterKeywordsList = async (id: string, payload: { cluster_count: number }) => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/search`);
+    const res = await fetch(`${apiUrl}${id}/cluster`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
     if (!res.ok) {
       // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
       throw new Error(`Request failed with status ${res.status}`);
     }
-    const data = await res.json();
-    return data as Search;
+
+    return await res.json()
   } catch (error) {
     console.error(error);
   }
 };
 
-export const createSuggestion = async (payload: any) => {
+export const createKeywordsList = async (payload: any) => {
   try {
     const res = await fetch(apiUrl, {
       method: 'POST',
@@ -62,7 +68,7 @@ export const createSuggestion = async (payload: any) => {
   }
 };
 
-export const updateSuggestion = async (id: string, payload: any) => {
+export const updateKeywordsList = async (id: string, payload: any) => {
   try {
     const res = await fetch(`${apiUrl}/${id}/`, {
       method: 'POST', // Change this to 'PUT' if the API requires a PUT request for updates
@@ -80,7 +86,7 @@ export const updateSuggestion = async (id: string, payload: any) => {
   }
 };
 
-export const deleteSuggestion = async (id: string) => {
+export const deleteKeywordsList = async (id: string) => {
   try {
     const res = await fetch(`${apiUrl}${id}/`, {
       method: 'DELETE',

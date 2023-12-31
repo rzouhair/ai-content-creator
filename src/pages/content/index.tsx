@@ -5,11 +5,11 @@ import { Document } from '@/lib/@types';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/router';
 import AppTable, { AvatarCell, SelectColumnFilter, StatusPill } from '@/components/App/AppTable';
-import AppButton from '@/components/App/AppButton';
 import NewDocument from '@/components/Modals/NewDocument';
 import { useAtom } from 'jotai';
 import { activeProject } from '@/stores/projects';
 import { setActiveDocumentAtom } from '@/stores/documents';
+import { Button } from '@/components/ui/button';
 
 function Content() {
 
@@ -67,15 +67,15 @@ function Content() {
   }
 
   return (
-    <div className='p-4'>
+    <div className='p-4 bg-white dark:bg-background h-screen'>
       <header className='flex items-center flex-wrap justify-end gap-4'>
-        <AppButton onClick={(e) => setDocumentCreateModal(true)}>Create document</AppButton>
+        <Button onClick={(e) => setDocumentCreateModal(true)}>Create document</Button>
       </header>
       {!loading && <AppTable
         columns={columns}
         data={documents || []}
         onRowClick={(row: any) => onDocumentClick(row)}
-      tableTitle={{
+        tableTitle={{
           title: 'Documents'
         }}
       />}

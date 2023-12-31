@@ -1,11 +1,18 @@
 import { extractTranscript, extractTranscriptInfo } from '@/api/outputs'
-import AppButton from '@/components/App/AppButton'
+import { Button } from '@/components/ui/button';
 import AppCard from '@/components/App/AppCard'
 import AppCheckbox from '@/components/App/AppCheckbox'
 import AppInput from '@/components/App/AppInput'
 import LayoutMain from '@/components/Layouts/LayoutMain'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 function VideoExtractor() {
   const [copied, setCopied] = useState(false)
@@ -75,39 +82,44 @@ function VideoExtractor() {
 
   return (
     <div>
-      <AppCard className={'max-w-2xl mx-auto mt-8'}>
-        <AppInput
-          placeholder='e.g. Best SEO tool'
-          hint='Provide the complete youtube video url'
-          label="Youtube video URL"
-          prefix={<i className='i-tabler-key'></i>}
-          value={url}
-          onChange={handleUrlChange}
-          suffix={loading ? <i className="i-tabler-loader"></i> : undefined}
-        />
-        <AppButton
-          background='red'
-          className={`${loading ? 'opacity-50 pointer-events-none' : ''} mt-4 ml-auto mr-0`}
-          suffixIcon={ loading ? 'i-tabler-loader' : 'i-tabler-brand-youtube' }
-          suffixIconClass={`${loading && 'animate-spin'}`}
-          onClick={() => extractYouTubeVideoId(url)}
-        >
-          Extract
-        </AppButton>
-      </AppCard>
+      <Card className={'max-w-2xl mx-auto mt-8'}>
+        <CardHeader>
+          <CardTitle>Youtube Transcript analysis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AppInput
+            placeholder='e.g. Best SEO tool'
+            hint='Provide the complete youtube video url'
+            label="Youtube video URL"
+            prefix={<i className='i-tabler-key'></i>}
+            value={url}
+            onChange={handleUrlChange}
+            suffix={loading ? <i className="i-tabler-loader"></i> : undefined}
+          />
+          <Button
+            variant='secondary'
+            className={`${loading ? 'opacity-50 pointer-events-none' : ''} mt-4 ml-auto mr-0`}
+            suffixIcon={ loading ? 'i-tabler-loader' : 'i-tabler-brand-youtube' }
+            suffixIconClass={`${loading && 'animate-spin'}`}
+            onClick={() => extractYouTubeVideoId(url)}
+          >
+            Extract
+          </Button>
+        </CardContent>
+      </Card>
       {
         transcript && <div
           className="prose mx-auto w-full max-w-2xl"
         >
           <div className='mx-auto w-full flex flex-wrap items-center justify-center my-4 gap-4'>
-            <AppButton
+            <Button
               onClick={() => setTranscriptShown(!transcriptShown)}
             >
               {transcriptShown ? 'Hide' : 'Show'} Transcript
-            </AppButton>
-            <AppButton
+            </Button>
+            <Button
               className={`${loading ? 'opacity-50 pointer-events-none' : ''}`}
-              background='orange'
+              variant="secondary"
               suffixIcon={ loading ? 'i-tabler-loader' : '' }
               suffixIconClass={`${loading && 'animate-spin'}`}
               onClick={
@@ -115,16 +127,16 @@ function VideoExtractor() {
               }
             >
               Get transcript analysis
-            </AppButton>
+            </Button>
           </div>
 
           <div className="mb-8">
             { transcriptShown && <p className='border rounded-md bg-light-300 p-4 my-8'>{transcript}</p> }
             {
               analysis && <div className='p-4 border bg-light-300'>
-                <AppButton className='ml-auto' square={true} onClick={() => copy()}>
+                <Button className='ml-auto' square={true} onClick={() => copy()}>
                   <i className={`text-xl ${copied ? 'i-tabler-check' : 'i-tabler-copy'}`}></i>
-                </AppButton>
+                </Button>
                 <ReactMarkdown className='prose prose-md'>
                   { analysis }
                 </ReactMarkdown>

@@ -1,5 +1,5 @@
 import { getDocumentById, updateDocument } from "@/api/documents";
-import AppButton from "@/components/App/AppButton";
+import { Button } from '@/components/ui/button'
 import QuillToolbar, { modules, formats } from "@/components/App/QuillToolbar";
 import QuillMarkdown from 'quilljs-markdown'
 import ContentSidebar from "@/components/Content/ContentSidebar";
@@ -82,9 +82,6 @@ function ContentDocument() {
         
         // @ts-ignore
         await ref?.editor.setContents(activeDocument?.delta || [])
-        console.log({
-          activeDocument
-        })
         setValue(activeDocument?.delta)
 
         // @ts-ignore
@@ -124,6 +121,7 @@ function ContentDocument() {
           content: editor.getText(),
           suggestion: activeDocument?.suggestion?._id || null
         })
+
       } catch (error) {
         console.error(error)
       } finally {

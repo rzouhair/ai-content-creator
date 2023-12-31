@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { Document, Search, Suggestion } from "@/lib/@types";
 import { useAtom } from 'jotai';
 import { sideBarTheme } from '@/stores/theme';
-import AppButton from '../App/AppButton';
+import { Button } from '@/components/ui/button';
 import { getSuggestionSearch, getSuggestions } from '@/api/suggestions';
 import { updateDocument } from '@/api/documents';
 import AppTabs from '../App/AppTabs';
 import SearchStructure from './Search/SearchStructure';
+import Variables from './ProgrammaticSeo/Variables';
 
 function ContentStructure({ document }: { document: Document | null }) {
 
@@ -83,6 +84,13 @@ function ContentStructure({ document }: { document: Document | null }) {
     "Outlines": () => (
       <div>
       </div>
+    ),
+    "Variables": () => (
+      <div>
+        <Variables
+          document={document}
+        />
+      </div>
     )
   }
 
@@ -94,7 +102,7 @@ function ContentStructure({ document }: { document: Document | null }) {
       </div>
       {(!document?.suggestion && !isChoosingSuggestion) && <div className='px-4'>
         <p className='font-bold my-4'>No suggestions is linked to this document</p>  
-        <AppButton block={true} onClick={startChoosingDocument}>Choose</AppButton>
+        <Button block={true} onClick={startChoosingDocument}>Choose</Button>
       </div>}
       {(!document?.suggestion && isChoosingSuggestion) && <div className='px-4'>
         <h2 className='font-bold py-4 text-center'>Suggestions list<br />(keyword - parent keyword)</h2>
@@ -102,7 +110,7 @@ function ContentStructure({ document }: { document: Document | null }) {
           {suggestions.map((suggestion: Suggestion) => {
             return <li key={suggestion._id} className='flex items-center justify-between'>
               <p className='truncate' dangerouslySetInnerHTML={{ __html: `${suggestion.search_query} - ${suggestion.parent_keyword}` }}></p>
-              <AppButton onClick={() => selectSuggestion(suggestion)} border="transparent" background='white' text='indigo-500' size='sm'>Select</AppButton>
+              <Button onClick={() => selectSuggestion(suggestion)} border="transparent" background='white' text='indigo-500' size='sm'>Select</Button>
             </li>
           })}
         </ul>

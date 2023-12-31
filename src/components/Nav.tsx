@@ -10,28 +10,25 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useRouter } from "next/router"
 
 export type NavLink = {
   title: string
   label?: string
   icon: LucideIcon | string
-  variant?: "light" | "ghost"
+  variant?: "default" | "ghost"
   to: string
 }
 
 export interface NavProps {
   isCollapsed: boolean
   links: NavLink[]
-  className?: string
 }
 
-export function AppNavItem({ links, isCollapsed, className }: NavProps) {
-  const router = useRouter()
+export function Nav({ links, isCollapsed }: NavProps) {
   return (
     <div
       data-collapsed={isCollapsed}
-      className={`group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2 ${className}`}
+      className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2"
     >
       <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
         {links.map((link, index) =>
@@ -41,14 +38,13 @@ export function AppNavItem({ links, isCollapsed, className }: NavProps) {
                 <Link
                   href={link.to}
                   className={cn(
-                    buttonVariants({ variant: link.variant || 'ghost', size: "icon" }),
+                    buttonVariants({ variant: link.variant || 'default', size: "icon" }),
                     "h-9 w-9",
-                    (!link.variant || link.variant === "light") &&
-                      "dark:bg-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
-                    router.pathname === link.to && "bg-muted dark:bg-muted dark:text-white",
+                    (!link.variant || link.variant === "default") &&
+                      "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
                   )}
                 >
-                  { typeof link.icon === 'string' ? <i className={`${link.icon} text-xl`}></i> : <link.icon className="h-4 w-4" /> }
+                  { typeof link.icon === 'string' ? <i className={`${link.icon} text-2xl text-gray-100`}></i> : <link.icon className="h-4 w-4" /> }
                   <span className="sr-only">{link.title}</span>
                 </Link>
               </TooltipTrigger>
@@ -64,22 +60,21 @@ export function AppNavItem({ links, isCollapsed, className }: NavProps) {
           ) : (
             <Link
               key={index}
-              href={link.to}
+              href="#"
               className={cn(
-                buttonVariants({ variant: link.variant || 'ghost', size: "sm" }),
-                (!link.variant || link.variant === "light") &&
-                  "dark:bg-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
-                router.pathname === link.to && "bg-muted dark:bg-muted dark:text-white",
+                buttonVariants({ variant: link.variant || 'default', size: "sm" }),
+                (!link.variant || link.variant === "default") &&
+                  "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white",
                 "justify-start"
               )}
             >
-              { typeof link.icon === 'string' ? <i className={`${link.icon} mr-3 text-xl`}></i> : <link.icon className="h-4 w-4" /> }
+              <link.icon className="mr-2 h-4 w-4" />
               {link.title}
               {link.label && (
                 <span
                   className={cn(
                     "ml-auto",
-                    (!link.variant || link.variant === "light") &&
+                    (!link.variant || link.variant === "default") &&
                       "text-background dark:text-white"
                   )}
                 >

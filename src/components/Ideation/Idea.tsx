@@ -1,36 +1,43 @@
 import { Suggestion } from '@/lib/@types';
+// @ts-ignore
+import { groupBy, capitalize } from 'lodash-es'
 import axios from '@/lib/axios';
 import { Popover, Transition } from '@headlessui/react';
 import { useRouter } from 'next/router';
-import React, { Fragment, useState } from 'react'
-import AppButton from '../App/AppButton';
+import React, { Fragment, useEffect, useState } from 'react'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import { useAtom } from 'jotai';
 import { activeProject as _activeProject } from '@/stores/projects'
 
 function Idea(props: { 
   keyword: string;
   qualifier: string;
+  country: string
 }) {
 
   const [activeProject] = useAtom(_activeProject)
   const [loading, setLoading] = useState<boolean>(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
 
-  const getQuerySuggestions = async(open: boolean) => {
-    if (!open) {
-      try {
-        setLoading(true)
-        const data = {
-          query: props.qualifier.replace('%', props.keyword),
-          with_styling: true,
-        }
-        const res = await axios.post('/keyword-research/suggest/', data)
-        setSuggestions(res.data)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoading(false)
+  const getQuerySuggestions = async() => {
+    try {
+      setLoading(true)
+      const data = {
+        query: props.qualifier.replace('%', props.keyword),
+        country: props.country,
+        with_styling: true,
       }
+      const res = await axios.post('/keyword-research/suggest/', data)
+      setSuggestions(Object.entries(res.data).map(([searchEngine, values]) => (values as string[]).map((v: string) => `${searchEngine}: ${v}`)).flat(1))
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -41,7 +48,7 @@ function Idea(props: {
   const addSuggestion = async(s: string) => {
     try {
       const data = {
-        parent_keyword: `Ideation process for "${props.qualifier.replace('%', props.keyword)}"`,
+        parent_keyword: `Ideation process for "${props.qualifier.replace('%', props.keyword.length ? props.keyword : '_')}"`,
         search_query: s.replaceAll(/<\/?b>/g, ""),
         project: activeProject?._id,
       }
@@ -51,53 +58,62 @@ function Idea(props: {
     }
   }
 
+  useEffect(() => {
+    getQuerySuggestions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props])
+
+  const keywordsByEngine = groupBy(
+    suggestions
+      .map((suggestion: string) => suggestion.split(':'))
+      .map(([searchEngine, keyword]: string[]) => ({
+        searchEngine,
+        keyword
+      })),
+    'searchEngine'
+  )
+  
+  const engineLink = (engine: string, keyword: string) => {
+    return {
+      'google': `https://www.google.com/search?q=${keyword}&gl=us`,
+      'bing': `https://www.bing.com/search?q=${keyword}&gl=us`,
+      'ddg': `https://www.duckduckgo.com/?q=${keyword}&gl=us`,
+    }[engine]
+  }
+
   return (
-    <div className='flex items-center justify-between relative'>
-      <p>{ props.qualifier.replace('%', props.keyword) }</p>
-      <Popover>
-        {({ open }) => (
-          <>
-            <Popover.Button
-              className={`${open ? '' : 'text-opacity-90'}`}
-            >
-              <AppButton size='sm' square={true} onClick={(e) => getQuerySuggestions(open)}>
-                <i className='i-tabler-search text-white text-xl'></i>
-              </AppButton>
-            </Popover.Button>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="opacity-0 translate-y-1"
-              enterTo="opacity-100 translate-y-0"
-              leave="transition ease-in duration-150"
-              leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-1"
-            >
-              <Popover.Panel className="bg-white absolute left-1/2 z-10 mt-3 max-w-sm -translate-x-1/2 transform px-4 sm:px-0 lg:max-w-3xl w-full">
-                <div className="overflow-hidden rounded-lg shadow-lg p-4">
-                  <h2 className='font-semibold text-lg text-black mb-4'>Google search suggestions</h2>
-                  <div className="flex flex-col gap-4">
-                    {
-                      loading ?
-                        <div className='p-5 flex items-center justify-center'>
-                          <i className='i-tabler-loader animate-spin' />
-                        </div> :
-                        suggestions.map((s: string) => <div className='flex items-center justify-between' key={s}>
-                          <p dangerouslySetInnerHTML={{ __html: s }} />
-                          <div className='gap-2'>
-                            <i className='text-indigo-800 i-tabler-copy font-semibold text-xl cursor-pointer' onClick={() => copy(s)}></i>
-                            <i className='text-indigo-800 i-tabler-arrow-up-right font-semibold text-xl cursor-pointer' onClick={(e) => window.open(`https://www.google.com/search?q=${s.replaceAll(/<\/?b>/g, "")}&gl=us`, '_blank')} />
-                            <i className='text-indigo-800 i-tabler-plus font-semibold text-xl cursor-pointer' onClick={() => addSuggestion(s)}></i>
-                          </div>
-                        </div>)
-                    }
-                  </div>
-                </div>
-              </Popover.Panel>
-            </Transition>
-          </>
-        )}
-      </Popover>
+    <div className='flex items-center justify-between relative w-full'>
+      <div className="overflow-hidden rounded-lg shadow-lg p-4 w-full">
+        <div className="flex flex-col gap-4">
+          {
+            loading
+            ? <div className='p-5 flex items-center justify-center'>
+              <i className='i-tabler-loader animate-spin' />
+            </div>
+            : <Tabs defaultValue="google">
+              <TabsList className={`grid w-full grid-cols-${Object.values(keywordsByEngine).length}`}>
+                {
+                  Object.entries(keywordsByEngine).map(([engine]) => <TabsTrigger value={engine} key={engine}>{capitalize(engine)}</TabsTrigger>)
+                }
+              </TabsList>
+              {
+                Object.entries(keywordsByEngine).map(([engine, keywords]: any, i: number) => <TabsContent value={engine} key={engine}>
+                  {
+                    keywords.map(({ searchEngine, keyword: kw }: any, i: number) => <div className='flex items-center justify-between py-1' key={i}>
+                      <p dangerouslySetInnerHTML={{ __html: kw }} />
+                      <div className='gap-2'>
+                        <i className='text-primary i-tabler-copy font-semibold text-xl cursor-pointer' onClick={() => copy(kw)}></i>
+                        <i className='text-primary i-tabler-arrow-up-right font-semibold text-xl cursor-pointer' onClick={(e) => window.open(engineLink(searchEngine, kw.replaceAll(/<\/?b>/g, "")), '_blank')} />
+                        <i className='text-primary i-tabler-plus font-semibold text-xl cursor-pointer' onClick={() => addSuggestion(kw)}></i>
+                      </div>
+                    </div>)
+                  }
+                </TabsContent>)
+              }
+            </Tabs>
+          }
+        </div>
+      </div>
     </div>
   )
 }

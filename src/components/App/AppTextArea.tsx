@@ -99,7 +99,7 @@ const AppTextarea = ({
   return (
     <div className={`${className}`}>
       <label htmlFor={rest.id} className="text-base font-semibold">{label}</label>
-      <div className={`${wrapperClassName || ''} mt-1.5 box-border flex flex-row resize-none items-center px-2 gap-2 transition-all bg-white dark:text-white dark:bg-gray-700 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 dark:border-gray-700 hover:border-${color}-300 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_3px_#F2F4F7]`}`}>
+      <div className={`${wrapperClassName || ''} max-h-[300px] overflow-auto mt-1.5 box-border flex flex-row resize-none px-2 gap-2 transition-all bg-white dark:text-white dark:bg-gray-700 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 dark:border-gray-700 hover:border-${color}-300 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_3px_#F2F4F7]`}`}>
         {prefix || null}
         <textarea
           placeholder={placeholder}

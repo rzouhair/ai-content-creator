@@ -7,6 +7,7 @@ import { Skill } from '@/lib/@types'
 
 import skillsObj from '@/lib/skills'
 import { activeProject } from '@/stores/projects'
+import { TooltipProvider } from '../ui/tooltip'
 
 function LayoutMain(props: any) {
 
@@ -93,14 +94,16 @@ function LayoutMain(props: any) {
   }, [currentProject])
 
   return (
-    <main className={`flex items-stretch justify-center max-h-screen ${theme}`}>
-      <AppNav navCollapsed={props.navCollapsed} />
-      <div className="flex-1 max-h-screen overflow-auto">
-        { reloaded ? props.children : <div className='h-screen w-full flex items-center justify-center'>
-          <i className='i-tabler-loader animate-spin text-2xl text-indigo-600'></i>
-        </div> }
-      </div>
-    </main>
+    <TooltipProvider>
+      <main className={`flex items-stretch justify-center max-h-screen ${theme}`}>
+        <AppNav navCollapsed={props.navCollapsed} />
+        <div className="flex-1 max-h-screen overflow-auto">
+          { reloaded ? props.children : <div className='h-screen w-full flex items-center justify-center'>
+            <i className='i-tabler-loader animate-spin text-2xl text-indigo-600'></i>
+          </div> }
+        </div>
+      </main>
+    </TooltipProvider>
   )
 }
 

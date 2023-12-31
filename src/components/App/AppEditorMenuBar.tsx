@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Editor } from '@tiptap/react';
 import AppInput from './AppInput';
 import AppCheckbox from './AppCheckbox';
-import AppButton from './AppButton';
+import { Button } from '@/components/ui/button';
 
 function AppEditorMenuBar({ editor }: { editor: Editor | null }) {
   const [showAnchor, setShowAnchor] = useState(false)
@@ -199,7 +199,7 @@ function AppEditorMenuBar({ editor }: { editor: Editor | null }) {
           <AppCheckbox id="target-blank" checked={blank} onChange={(e) => setBlank(e.target.checked)}>
             Target blank
           </AppCheckbox>
-          <AppButton onClick={insertLink}>Insert</AppButton>
+          <Button onClick={insertLink}>Insert</Button>
         </div>
       }
     </div>

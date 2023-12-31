@@ -1,3 +1,18 @@
+export interface Keywords {
+  _id: string;
+  title?: string;
+  suggestion?: string | null
+  saved_cluster?: {
+    keywords: string[];
+    parent_keyword: string
+  }[] | null
+  embeddings: {
+    keyword: string
+    embedding: number[]
+  }[]
+  created_at: string;
+}
+
 export interface Suggestion {
   _id: string;
   parent_keyword: string;
@@ -33,6 +48,7 @@ export interface InputSchema {
   type: string;
   label: string;
   required: boolean;
+  default?: string
   placeholder: string;
 }
 

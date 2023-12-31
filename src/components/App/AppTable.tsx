@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTable, useFilters, useGlobalFilter, useAsyncDebounce, useSortBy, usePagination, useExpanded } from 'react-table'
-import AppButton from './AppButton';
+import { Button } from '@/components/ui/button';
 import AppInput from './AppInput';
 
 export function classNames(...classes) {
@@ -154,7 +154,7 @@ function AppTable({ columns, data, onRowClick, tableTitle, tableHeader }: { colu
   // Render the UI for your table
   return (
     <div className='border border-gray-200 shadow-sm rounded-xl'>
-      <div className="sm:flex sm:gap-x-2 px-6 py-3 justify-between items-center">
+      <div className="sm:flex sm:gap-x-2 px-6 py-3 justify-between items-center dark:text-white">
         {
           tableTitle && <div className='flex flex-col gap-1 my-2'>
             <p className='font-bold'>{ tableTitle?.title }</p>
@@ -183,8 +183,8 @@ function AppTable({ columns, data, onRowClick, tableTitle, tableHeader }: { colu
       </div>
       {/* table */}
       <div className="border-t border-gray-200 flex flex-col">
-        <table {...getTableProps()} className="min-w-full divide-y divide-gray-200 box-border items-start p-0 left-16 top-16 bg-white border-gray-200 rounded-12">
-          <thead className="bg-gray-50">
+        <table {...getTableProps()} className="min-w-full divide-y divide-gray-200 box-border items-start p-0 left-16 top-16 bg-white dark:bg-background border-gray-200 rounded-12">
+          <thead className="dark:bg-night">
             {headerGroups.map((headerGroup, i1) => (
               <tr key={i1} {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column, i2) => (
@@ -216,7 +216,7 @@ function AppTable({ columns, data, onRowClick, tableTitle, tableHeader }: { colu
           </thead>
           <tbody
             {...getTableBodyProps()}
-            className="bg-white divide-y divide-gray-200"
+            className="bg-white dark:bg-background dark:text-white divide-y divide-gray-200"
           >
             {data?.length ? page.map((row, i) => {  // new
               prepareRow(row)
@@ -248,7 +248,7 @@ function AppTable({ columns, data, onRowClick, tableTitle, tableHeader }: { colu
       {/* Pagination */}
       <div className="py-3 px-6 flex items-center justify-between border-t border-gray-200">
         <div className="flex-1 flex justify-between items-center">
-          <AppButton onClick={() => previousPage()} border="gray-300" background='white' text='gray-900' size='sm' prefixIcon='i-tabler-arrow-left' disabled={!canPreviousPage}>Previous</AppButton>
+          <Button onClick={() => previousPage()} variant="ghost" size='sm' prefixIcon='i-tabler-arrow-left' disabled={!canPreviousPage}>Previous</Button>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
             <div className="flex gap-x-2 items-baseline">
               <span className="text-sm text-gray-700">
@@ -273,40 +273,40 @@ function AppTable({ columns, data, onRowClick, tableTitle, tableHeader }: { colu
             </div>
             {/* <div>
               <nav className="relative z-0 inline-flex rounded-md -space-x-px" aria-label="Pagination">
-                <AppButton
+                <Button
                   className="rounded-l-md"
                   onClick={() => gotoPage(0)}
                   disabled={!canPreviousPage}
                 >
                   <span className="sr-only">First</span>
                   <i className=" i-tabler-chevrons-left h-5 w-5 text-gray-400" aria-hidden="true" />
-                </AppButton>
-                <AppButton
+                </Button>
+                <Button
                   onClick={() => previousPage()}
                   disabled={!canPreviousPage}
                 >
                   <span className="sr-only">Previous</span>
                   <i className="i-tabler-chevron-left h-5 w-5 text-gray-400" aria-hidden="true" />
-                </AppButton>
-                <AppButton
+                </Button>
+                <Button
                   onClick={() => nextPage()}
                   disabled={!canNextPage
                   }>
                   <span className="sr-only">Next</span>
                   <i className="i-tabler-chevrons-right h-5 w-5 text-gray-400" aria-hidden="true" />
-                </AppButton>
-                <AppButton
+                </Button>
+                <Button
                   className="rounded-r-md"
                   onClick={() => gotoPage(pageCount - 1)}
                   disabled={!canNextPage}
                 >
                   <span className="sr-only">Last</span>
                   <i className="i-tabler-chevron-right h-5 w-5 text-gray-400" aria-hidden="true" />
-                </AppButton>
+                </Button>
               </nav>
             </div> */}
           </div>
-          <AppButton onClick={() => nextPage()} border="gray-300" background='white' text='gray-900' size='sm' suffixIcon='i-tabler-arrow-right' disabled={!canNextPage}>Next</AppButton>
+          <Button onClick={() => nextPage()} size='sm' variant={'ghost'} suffixIcon='i-tabler-arrow-right' disabled={!canNextPage}>Next</Button>
         </div>
        
       </div>
