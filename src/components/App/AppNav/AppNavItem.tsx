@@ -18,6 +18,7 @@ export type NavLink = {
   icon: LucideIcon | string
   variant?: "light" | "ghost"
   to: string
+  onClick?: Function
 }
 
 export interface NavProps {
@@ -28,6 +29,9 @@ export interface NavProps {
 
 export function AppNavItem({ links, isCollapsed, className }: NavProps) {
   const router = useRouter()
+
+  const isRouteActive = (link: NavLink) => (router.pathname === '/' && link.to === '/') || (router.pathname.includes(link.to) && link.to !== '/')
+
   return (
     <div
       data-collapsed={isCollapsed}
@@ -40,12 +44,13 @@ export function AppNavItem({ links, isCollapsed, className }: NavProps) {
               <TooltipTrigger asChild>
                 <Link
                   href={link.to}
+                  onClick={(e) => link.onClick?.(e)}
                   className={cn(
                     buttonVariants({ variant: link.variant || 'ghost', size: "icon" }),
                     "h-9 w-9",
                     (!link.variant || link.variant === "light") &&
                       "dark:bg-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
-                    router.pathname === link.to && "bg-muted dark:bg-muted dark:text-white",
+                    isRouteActive(link) && "bg-muted dark:bg-muted dark:text-white",
                   )}
                 >
                   { typeof link.icon === 'string' ? <i className={`${link.icon} text-xl`}></i> : <link.icon className="h-4 w-4" /> }
@@ -65,11 +70,12 @@ export function AppNavItem({ links, isCollapsed, className }: NavProps) {
             <Link
               key={index}
               href={link.to}
+              onClick={(e) => link.onClick?.(e)}
               className={cn(
                 buttonVariants({ variant: link.variant || 'ghost', size: "sm" }),
                 (!link.variant || link.variant === "light") &&
                   "dark:bg-transparent dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white",
-                router.pathname === link.to && "bg-muted dark:bg-muted dark:text-white",
+                isRouteActive(link) && "bg-muted dark:bg-muted dark:text-white",
                 "justify-start"
               )}
             >

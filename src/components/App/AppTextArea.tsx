@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Textarea } from '../ui/textarea';
 
 const AppTextarea = ({
   label,
@@ -7,7 +8,7 @@ const AppTextarea = ({
   validation,
   errorMessage,
   autocomplete,
-  color = 'indigo',
+  color = 'secondary',
   value,
   onChange,
   onSubmit = () => {},
@@ -47,6 +48,9 @@ const AppTextarea = ({
   resizable?: boolean;
   invalid?: boolean;
 }) => {
+  // border-secondary
+  // !border-secondary
+  // hover:border-secondary
 
   const [focused, setFocused] = useState(false)
   const [shift, setShift] = useState(false)
@@ -98,10 +102,10 @@ const AppTextarea = ({
 
   return (
     <div className={`${className}`}>
-      <label htmlFor={rest.id} className="text-base font-semibold">{label}</label>
-      <div className={`${wrapperClassName || ''} max-h-[300px] overflow-auto mt-1.5 box-border flex flex-row resize-none px-2 gap-2 transition-all bg-white dark:text-white dark:bg-gray-700 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-gray-300 dark:border-gray-700 hover:border-${color}-300 !shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 shadow-[0px_0px_0px_3px_#F2F4F7]`}`}>
+      <label htmlFor={rest.id} className="text-base font-semibold dark:text-white">{label}</label>
+      <div className={`${wrapperClassName || ''} max-h-[300px] overflow-auto dark:text-white mt-1.5 flex flex-row items-center transition-all bg-white dark:bg-night-500 border border-ghost_white dark:border-muted shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `!shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `!border-secondary focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2`}`}>
         {prefix || null}
-        <textarea
+        <Textarea
           placeholder={placeholder}
           value={value}
           // @ts-ignore
@@ -115,7 +119,7 @@ const AppTextarea = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
-          className={`outline-none bg-transparent flex-1 overflow-hidden text-base resize-none w-full py-2 ${inputClassName}`}
+          className={`outline-none flex-1 text-base w-full bg-transparent border-none focus-visible:ring-none focus-visible:ring-transparent focus-visible:ring-offset-0 ${focused && 'outline-none'} ${inputClassName}`}
           {...rest}
         />
         {suffix || null}

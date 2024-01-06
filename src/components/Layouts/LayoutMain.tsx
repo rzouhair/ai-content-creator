@@ -12,6 +12,7 @@ import { TooltipProvider } from '../ui/tooltip'
 function LayoutMain(props: any) {
 
   const [theme] = useAtom(sideBarTheme)
+  const isPadded = props.padded === undefined || props.padded === true
 
   const [, _setSkills] = useAtom(setSkills)
   const [currentProject] = useAtom(activeProject)
@@ -95,9 +96,19 @@ function LayoutMain(props: any) {
 
   return (
     <TooltipProvider>
-      <main className={`flex items-stretch justify-center max-h-screen ${theme}`}>
+      <main className={`flex items-stretch justify-center max-h-screen bg-background ${theme}`}>
+        <p></p>
         <AppNav navCollapsed={props.navCollapsed} />
-        <div className="flex-1 max-h-screen overflow-auto">
+        <div className={`flex-1 max-h-screen overflow-auto ${isPadded ? 'px-4' : ''}`}>
+          {
+            props.title
+            && <div className='mb-4'>
+              <h1 className='text-3xl font-semibold leading-none tracking-tight mb-2 dark:text-white'>{props.title}</h1>
+              {
+                props.description && <p className='text-sm text-muted-foreground'>{props.description}</p>
+              }
+            </div>
+          }
           { reloaded ? props.children : <div className='h-screen w-full flex items-center justify-center'>
             <i className='i-tabler-loader animate-spin text-2xl text-indigo-600'></i>
           </div> }

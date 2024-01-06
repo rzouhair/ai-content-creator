@@ -1,17 +1,30 @@
 import { Fragment, useEffect, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 
-export default function AppListbox(props: {
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+interface ListBoxProps extends Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, 'onChange'> {
   options: { label: string; value: string; }[]
   label?: string
   value: string
   onChange?: Function
-}) {
-  const [selected, setSelected] = useState(props.options?.[0].value)
-  const selectedLabel = props.options?.find((o) => o.value === selected)?.label
+}
+
+export default function AppListbox(props: ListBoxProps) {
+  const [selected, setSelected] = useState(props.value || props.options?.[0].value)
+  const [selectedLabel, setSelectedLabel] = useState(props.options?.find((o) => o.value === selected)?.label)
 
   useEffect(() => {
     props.onChange?.(selected)
+    setSelectedLabel(props.options?.find((o) => o.value === selected)?.label)
   }, [selected, props])
 
   useEffect(() => {
@@ -19,58 +32,21 @@ export default function AppListbox(props: {
   }, [props])
 
   return (
-    <div className="">
+    <div className="flex gap-2 w-full flex-col">
       { props.label && <label className="text-base font-semibold">{props.label}</label> }
-      <Listbox value={selected} onChange={setSelected}>
-        <div className="relative mt-2 z-20">
-          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white dark:bg-night-300 py-2 pl-3 pr-10 text-left border focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-            <span className="block truncate">{selectedLabel}</span>
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-              <i
-                className="i-tabler-chevron-down h-5 w-5 text-gray-400"
-                aria-hidden="true"
-              />
-            </span>
-          </Listbox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {props.options.map((option, optionId) => (
-                <Listbox.Option
-                  key={optionId}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-indigo-100 text-indigo-900' : 'text-gray-900'
-                    }`
-                  }
-                  value={option.value}
-                >
-                  {({ selected }) => (
-                    <>
-                      <span
-                        className={`block truncate ${
-                          selected ? 'font-medium' : 'font-normal'
-                        }`}
-                      >
-                        {option.label}
-                      </span>
-                      {selected ? (
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-indigo-600">
-                          <i className="i-tabler-check h-5 w-5" aria-hidden="true" />
-                        </span>
-                      ) : null}
-                    </>
-                  )}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Transition>
-        </div>
-      </Listbox>
+      <Select onValueChange={setSelected} defaultValue={selected}>
+        <SelectTrigger className='outline-none ring-transparent focus:ring-1 focus:ring-secondary focus:ring-offset-0'>
+          <SelectValue className='outline-none ring-transparent focus:ring-1 focus:ring-secondary focus:ring-offset-0' placeholder={selectedLabel} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>{props.label}</SelectLabel>
+            {props.options.map((option, optionId) => (
+              <SelectItem key={optionId} value={option.value}>{option.label}</SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </div>
   )
 }

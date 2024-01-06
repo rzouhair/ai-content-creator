@@ -6,10 +6,17 @@ import { Menu, Transition } from "@headlessui/react";
 import Link from "next/link";
 import AppProjects from "@/components/App/AppNav/AppProjects";
 import { NavLink } from "@/components/App/AppNav/AppNavItem";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@radix-ui/react-tooltip";
+import link from "next/link";
+import { DoorClosed } from "lucide-react";
+import { useRouter } from "next/router";
 
 function AppNav(props: { navCollapsed?: boolean }) {
   const [theme] = useAtom(sideBarTheme);
   const [, setSideTheme] = useAtom(setSidebarTheme);
+  const router = useRouter()
 
   const [navItems] = useState<NavLink[]>([
     {
@@ -25,6 +32,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
     },
     { to: "/ideation", icon: "i-tabler-bulb", title: "Ideation" },
     { to: "/clustering", icon: "i-tabler-filters", title: "Keywords Clustering" },
+    { to: "/tools", icon: "i-tabler-tools", title: "Tools" },
     { to: "/chat", icon: "i-tabler-message", title: "Chat" },
     { to: "/video-extractor", icon: "i-tabler-brand-youtube", title: "Youtube extractor" },
     /* { to: '/tasks', icon: 'i-tabler-checkup-list', title: 'Tasks' },
@@ -43,6 +51,17 @@ function AppNav(props: { navCollapsed?: boolean }) {
       icon: "i-tabler-settings",
       title: "Settings",
     },
+    {
+      to: "#",
+      icon: "i-tabler-door",
+      title: "Logout",
+      onClick: (e: any) => {
+        e.preventDefault()
+        localStorage.removeItem('rb_access_token')
+        localStorage.removeItem('rb_refresh_token')
+        router.push('/login')
+      }
+    },
   ]);
 
 
@@ -52,7 +71,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
         !props.navCollapsed
           ? "min-w-[312px] w-[312px]"
           : "min-w-[82px] w-[82px]"
-      } top-0 left-0 h-screen transition-transform -translate-x-full sm:translate-x-0 z-40`}
+      } top-0 left-0 h-screen transition-transform -translate-x-full sm:translate-x-0 z-40 border-r`}
     >
       <nav
         className={`${
@@ -78,7 +97,6 @@ function AppNav(props: { navCollapsed?: boolean }) {
           isCollapsed={!!props.navCollapsed}
           links={bottomNavItems}
         />
-
         {/* {!props.navCollapsed && (
           <div
             className={`${

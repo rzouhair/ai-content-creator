@@ -134,7 +134,7 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
               />
             </div>
             <div className='flex items-center justify-between gap-4'>
-              <Button background='purple' loading={loading} className='flex-1 mt-4 mb-2' onClick={() => resetForm()}>Clear inputs</Button>
+              <Button variant="outline" loading={loading} className='flex-1 mt-4 mb-2' onClick={() => resetForm()}>Clear inputs</Button>
               <Button className='flex-1 mt-4 mb-2' loading={loading} onClick={(e) => generateOutput()}>Generate</Button>
             </div>
           </div>

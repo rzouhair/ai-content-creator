@@ -3,6 +3,7 @@ import { Editor } from '@tiptap/react';
 import AppInput from './AppInput';
 import AppCheckbox from './AppCheckbox';
 import { Button } from '@/components/ui/button';
+import { CheckedState } from '@radix-ui/react-checkbox';
 
 function AppEditorMenuBar({ editor }: { editor: Editor | null }) {
   const [showAnchor, setShowAnchor] = useState(false)
@@ -196,7 +197,7 @@ function AppEditorMenuBar({ editor }: { editor: Editor | null }) {
         showAnchor &&
         <div className='flex flex-col gap-2 py-4 px-2 border-x border-gray-900 w-full mx-auto'>
           <AppInput type="text" wrapperClassName='!w-full' value={link} placeholder="Insert you link here" onChange={(e) => setLink(e.target.value)} />
-          <AppCheckbox id="target-blank" checked={blank} onChange={(e) => setBlank(e.target.checked)}>
+          <AppCheckbox id="target-blank" checked={blank} onChange={(e: CheckedState) => setBlank(e as boolean)}>
             Target blank
           </AppCheckbox>
           <Button onClick={insertLink}>Insert</Button>

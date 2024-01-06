@@ -38,7 +38,7 @@ function ContentOutput({ output, className, onOutputDeleted }: { output: Output;
   }
 
   return (
-    <div className={`px-4 py-4 border-b border-gray-200 group cursor-pointer bg-green-50 hover:bg-green-300/5 ${className}`}>
+    <div className={`px-4 py-4 border-b border-gray-200 group cursor-pointer hover:bg-secondary/5 ${className}`}>
       <div className='flex items-center justify-between mb-6'>
         <div>
           <p className='text-gray-400/75 text-sm'>{ dayjs(output.created_at).fromNow() }</p>
@@ -55,7 +55,7 @@ function ContentOutput({ output, className, onOutputDeleted }: { output: Output;
         </div>
       </div>
       <ReactMarkdown
-        className='prose prose-sm'
+        className='prose prose-sm dark:prose-invert w-full max-w-none'
       >
         {output.text}
       </ReactMarkdown>

@@ -45,14 +45,13 @@ function SystemPromptModal(props: any) {
 
   return (
     <ModalBase
-      title=""
+      title="New project"
+      description='Projects help you organize your work'
       open={props.open}
-      onClose={() => props.onClose(false)}
+      trigger={props.trigger}
+      onClose={props.onClose}
       className="max-w-[450px]"
     >
-      <h1 className="mb-2 mt-0 font-bold">New project</h1>
-      <p className='text-gray-500 mb-5'>Projects help you organize your work</p>
-
       <div className='flex flex-col gap-4'>
         <AppInput
           label='Project name'
@@ -70,7 +69,7 @@ function SystemPromptModal(props: any) {
       </div>
 
       <div className='flex items-center justify-end gap-4 mt-4'>
-        <Button onClick={(e) => props.onClose(false)} background='light' text='black'>Cancel</Button>
+        <Button onClick={props.onClose} variant="outline">Cancel</Button>
         <Button onClick={(e) => saveProject()}>Save Project</Button>
       </div>
     </ModalBase>

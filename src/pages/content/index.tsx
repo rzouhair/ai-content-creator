@@ -4,12 +4,14 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Document } from '@/lib/@types';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/router';
-import AppTable, { AvatarCell, SelectColumnFilter, StatusPill } from '@/components/App/AppTable';
+import AppTable, { AvatarCell, PaginationInfo, SelectColumnFilter, StatusPill } from '@/components/App/AppTable';
 import NewDocument from '@/components/Modals/NewDocument';
 import { useAtom } from 'jotai';
 import { activeProject } from '@/stores/projects';
 import { setActiveDocumentAtom } from '@/stores/documents';
 import { Button } from '@/components/ui/button';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@/components/App/AppDataTable/DataTable';
 
 function Content() {
 
@@ -39,24 +41,62 @@ function Content() {
     getData()
   }, [documentCreateModalOpen])
 
-  const columns = React.useMemo(() => [
+  const [pagination, setPagination] = React.useState<PaginationInfo>({
+    itemCount: 0,
+    pageSize: 10,
+    page: 1,
+    pageCount: 1,
+  })
+
+  function onUpdatePage(page: number) {
+    setPagination({
+      ...pagination,
+      page,
+    } as PaginationInfo)
+
+    console.log("Page changed here: " + page)
+  }
+  function onUpdatePageSize(pageSize: number) {
+    setPagination({
+      ...pagination,
+      pageSize,
+      pageCount: 1
+    } as PaginationInfo)
+    console.log("Page size changed here: " + pageSize)
+  }
+
+  const columns = React.useMemo<ColumnDef<unknown, unknown>[]>(() => [
     {
-      Header: "Name",
-      accessor: 'name',
+      accessorKey: "name",
+      header: "Name",
     },
     {
-      Header: "Created at",
-      accessor: 'created_at',
-      Cell: ({ value }: { value: string }) => {
-        return <p className='text-sm text-gray-800'>{ dayjs(value)?.format('DD/MM/YYYY HH:mm:ss') }</p>
-      }
+      accessorKey: "created_at",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Created at
+          </Button>
+        )
+      },
+      cell: ({ row }) => <div className="lowercase">{ dayjs(row.getValue("created_at"))?.format('DD/MM/YYYY HH:mm:ss')}</div>,
     },
     {
-      Header: "Updated at",
-      accessor: 'updated_at',
-      Cell: ({ value }: { value: string }) => {
-        return <p className='text-sm text-gray-800'>{ dayjs(value)?.format('DD/MM/YYYY HH:mm:ss') }</p>
-      }
+      accessorKey: "updated_at",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Updated at
+          </Button>
+        )
+      },
+      cell: ({ row }) => <div className="lowercase">{ dayjs(row.getValue("updated_at"))?.format('DD/MM/YYYY HH:mm:ss')}</div>,
     },
   ], [])
 
@@ -67,26 +107,36 @@ function Content() {
   }
 
   return (
-    <div className='p-4 bg-white dark:bg-background h-screen'>
-      <header className='flex items-center flex-wrap justify-end gap-4'>
-        <Button onClick={(e) => setDocumentCreateModal(true)}>Create document</Button>
-      </header>
-      {!loading && <AppTable
+    <div className='bg-white dark:bg-background h-screen'>
+      {!loading && <DataTable
         columns={columns}
         data={documents || []}
+        pagination={pagination}
+        onUpdatePage={onUpdatePage}
+        onUpdatePageSize={onUpdatePageSize}
         onRowClick={(row: any) => onDocumentClick(row)}
         tableTitle={{
           title: 'Documents'
         }}
+        tableHeader={(table) => {
+          return <NewDocument
+            open={documentCreateModalOpen}
+            trigger={<Button onClick={(e) => setDocumentCreateModal(true)}>Create document</Button>}
+            onClose={(e) => setDocumentCreateModal(false)}
+          />
+        }}
       />}
-
-      <NewDocument open={documentCreateModalOpen} onClose={(e) => setDocumentCreateModal(false)} />
     </div>
   )
 }
 
 Content.getLayout = function getLayout(page: any) {
-  return <LayoutMain>{page}</LayoutMain>;
+  return <LayoutMain
+    title="Content Editor"
+    description="Create documents to hold you well crafted blog posts"
+  >
+    {page}
+  </LayoutMain>;
 }
 
 export default Content

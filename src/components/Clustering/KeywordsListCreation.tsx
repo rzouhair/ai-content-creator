@@ -47,14 +47,13 @@ function KeywordsListCreation(props: any) {
 
   return (
     <ModalBase
-      title=""
+      title="Create a new Keywords list"
+      description='You can cluster the keywords based on your preferences'
       open={props.open}
-      onClose={() => props.onClose(false)}
+      trigger={props.trigger}
+      onClose={props.onClose}
       className="max-w-[450px]"
     >
-      <h1 className="mb-2 mt-0 font-bold">Create a new Keywords list</h1>
-      <p className='text-gray-500 mb-5'>You can cluster the keywords based on your preferences</p>
-
       <div className='flex flex-col gap-4'>
         <AppInput
           label='List title'
@@ -72,7 +71,7 @@ function KeywordsListCreation(props: any) {
       </div>
 
       <div className='flex items-center justify-between gap-4 mt-4'>
-        <Button onClick={(e) => props.onClose(false)} loading={loading} background='light' text='black'>Cancel</Button>
+        <Button loading={loading} variant='outline' onClick={props.onClose}>Cancel</Button>
         <Button onClick={(e) => saveProject()} loading={loading}>Save</Button>
       </div>
     </ModalBase>

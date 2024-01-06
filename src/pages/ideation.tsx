@@ -115,7 +115,7 @@ function Ideation() {
       <Card className={'max-w-2xl mx-auto !overflow-visible flex-1 mr-0'}>
         <CardHeader>
           <CardTitle className='mt-0'>Ideation search queries constructor</CardTitle>
-          <CardDescription>Construct search queries and get ideas on th fly</CardDescription>
+          <CardDescription>Construct search queries and get ideas on the fly</CardDescription>
         </CardHeader>
         <CardContent>
           <ScrollArea>
@@ -317,7 +317,10 @@ function Ideation() {
 }
 
 Ideation.getLayout = (page: any) => {
-  return <LayoutMain>
+  return <LayoutMain
+    title="Ideation"
+    description="Use the ideation form to get hundreds of keyword ideas that are suggested by search engines"
+  >
     {page}
   </LayoutMain>
 }

@@ -29,13 +29,6 @@ export const modules = {
         shortKey: true,
         handler: async function(range, context) {
           // Handle shift+b
-          console.log("Ctrl/Cmd Enter")
-          console.log({
-            quill: this.quill,
-            range,
-            context,
-          })
-
           let selection = null
           let ctx = ""
           let command = ""
@@ -138,7 +131,7 @@ export const formats = [
 // Quill Toolbar component
 export const QuillToolbar = (props: { loading: boolean }) => (
   <div id="toolbar" className="flex items-center justify-between gap-2 w-full !border-t-transparent !border-x-transparent !border-b border-gray-200" >
-    <div className="flex-1">
+    <div className="flex-1 text-text">
       <span className="ql-formats">
         <button className="ql-undo">
           <i className="text-2xl h-[18px] i-tabler-arrow-back" />

@@ -117,7 +117,7 @@ function KeywordListPage() {
             {keywords?.map((keyword, i) => <div className="flex items-center justify-between" key={i}>
               <p className="p-2">{ keyword }</p>
               <div className="w-fit">
-                <Button square={true} background="transparent" text="black">
+                <Button size="icon" variant="ghost">
                   <i className="i-tabler-copy"></i>
                 </Button>
               </div>
@@ -130,7 +130,13 @@ function KeywordListPage() {
 }
 
 KeywordListPage.getLayout = function getLayout(page: any) {
-  return <LayoutMain navCollapsed={false}>{page}</LayoutMain>;
+  return <LayoutMain
+    title="Keywords Clustering"
+    description="Organize your keywords list by clustering them by similarity and relevance"
+    navCollapsed={false}
+  >
+    {page}
+  </LayoutMain>;
 };
 
 export default KeywordListPage;

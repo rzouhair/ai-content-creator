@@ -87,6 +87,19 @@ export interface Project {
   updated_at: string;
 }
 
+export interface User {
+  _id: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  password: string;
+  email: string;
+  is_admin: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Document {
   _id: string;
   name: string;
@@ -97,4 +110,11 @@ export interface Document {
   suggestion: Suggestion | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PaginationInfo {
+  page: number
+  pageSize: number
+  pageCount: number
+  itemCount: number | undefined
 }

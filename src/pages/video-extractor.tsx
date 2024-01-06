@@ -1,7 +1,5 @@
 import { extractTranscript, extractTranscriptInfo } from '@/api/outputs'
 import { Button } from '@/components/ui/button';
-import AppCard from '@/components/App/AppCard'
-import AppCheckbox from '@/components/App/AppCheckbox'
 import AppInput from '@/components/App/AppInput'
 import LayoutMain from '@/components/Layouts/LayoutMain'
 import React, { useState } from 'react'

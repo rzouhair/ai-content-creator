@@ -59,6 +59,7 @@ function SystemPromptModal(props: any) {
   return (
     <ModalBase
       title="System/character prompts"
+      trigger={props.trigger}
       open={props.open}
       onClose={() => props.onClose(false)}
       className="max-w-[750px]"

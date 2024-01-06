@@ -139,7 +139,7 @@ function ContentDocument() {
           <QuillToolbar loading={saving} />
           <ReactQuill
             ref={quill}
-            className="!w-full max-w-5xl mx-auto max-h-screen overflow-auto flex-1"
+            className="!w-full max-w-5xl mx-auto max-h-screen overflow-auto prose dark:prose-invert flex-1"
             theme="snow"
             modules={modules}
             formats={formats}
@@ -154,7 +154,7 @@ function ContentDocument() {
 }
 
 ContentDocument.getLayout = function getLayout(page: any) {
-  return <LayoutMain navCollapsed={true}>{page}</LayoutMain>;
+  return <LayoutMain navCollapsed={true} padded={false}>{page}</LayoutMain>;
 };
 
 export default ContentDocument;

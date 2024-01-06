@@ -1,155 +1,85 @@
 import React from 'react'
 import { useTable, useFilters, useGlobalFilter, useAsyncDebounce, useSortBy, usePagination, useExpanded } from 'react-table'
-import { Button } from '@/components/ui/button';
-import AppInput from './AppInput';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+import AppPagination from './AppPagination';
 
-export function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
+export interface PaginationInfo {
+  page: number
+  pageSize: number
+  pageCount: number
+  itemCount: number | undefined
 }
 
-// Define a default UI for filtering
-function GlobalFilter({
-  preGlobalFilteredRows,
-  globalFilter,
-  setGlobalFilter,
-}) {
-  const count = preGlobalFilteredRows.length
-  const [value, setValue] = React.useState(globalFilter)
-  const onChange = useAsyncDebounce(value => {
-    setGlobalFilter(value || undefined)
-  }, 200)
-
-  return (
-    <label className="flex gap-x-2 items-baseline">
-      <AppInput
-        type="text"
-        value={value || ""}
-        onChange={e => {
-          setValue(e.target.value);
-          onChange(e.target.value);
-        }}
-        suffix={<i className='i-tabler-search' />}
-        placeholder={`${count} records...`}
-      />
-    </label>
-  )
-}
-
-// This is a custom filter UI for selecting
-// a unique option from a list
-export function SelectColumnFilter({
-  column: { filterValue, setFilter, preFilteredRows, id, render },
-}) {
-  // Calculate the options for filtering
-  // using the preFilteredRows
-  const options = React.useMemo(() => {
-    const options = new Set()
-    preFilteredRows.forEach(row => {
-      options.add(row.values[id])
-    })
-    return [...options.values()]
-  }, [id, preFilteredRows])
-
-  // Render a multi-select box
-  return (
-    <label className="flex gap-x-2 items-baseline">
-      <span className="text-gray-700">{render("Header")}: </span>
-      <select
-        className="rounded-md border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-        name={id}
-        id={id}
-        value={filterValue}
-        onChange={e => {
-          setFilter(e.target.value || undefined)
-        }}
-      >
-        <option value="">All</option>
-        {options.map((option, i) => (
-          <option key={i} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
-}
-
-export function StatusPill({ value }) {
-  const status = value ? value.toLowerCase() : "unknown";
-
-  return (
-    <span
-      className={
-        classNames(
-          "px-3 py-1 uppercase leading-wide font-bold text-xs rounded-full shadow-sm",
-          status.startsWith("active") ? "bg-green-100 text-green-800" : null,
-          status.startsWith("inactive") ? "bg-yellow-100 text-yellow-800" : null,
-          status.startsWith("offline") ? "bg-red-100 text-red-800" : null,
-        )
-      }
-    >
-      {status}
-    </span>
-  );
-};
-
-export function AvatarCell({ value, column, row }) {
-  return (
-    <div className="flex items-center">
-      <div className="flex-shrink-0 h-10 w-10">
-        <img className="h-10 w-10 rounded-full" src={row.original[column.imgAccessor]} alt="" />
-      </div>
-      <div className="ml-4">
-        <div className="text-sm font-medium text-gray-900">{value}</div>
-        <div className="text-sm text-gray-500">{row.original[column.emailAccessor]}</div>
-      </div>
-    </div>
-  )
-}
-
-function AppTable({ columns, data, onRowClick, tableTitle, tableHeader }: { columns: any; data: any; onRowClick?: (row: any) => void; tableTitle?: { title: string; subtitle?: string; }; tableHeader?: () => JSX.Element }) {
-
-  const defaultColumn = React.useMemo(
-    () => ({
-      minWidth: 100,
-      width: 150,
-      maxWidth: 400,
-    }),
-    []
-  )
-  // Use the state and functions returned from useTable to build your UI
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    page, // Instead of using 'rows', we'll use page,
-    // which has only the rows for the active page
-
-    // The rest of these things are super handy, too ;)
-    canPreviousPage,
-    canNextPage,
-    pageOptions,
-    pageCount,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
-
-    state,
-    preGlobalFilteredRows,
-    setGlobalFilter,
-  } = useTable({
+function AppTable({
     columns,
     data,
-    defaultColumn,
-  },
-    useFilters, // useFilters!
-    useGlobalFilter,
-    useSortBy,
-    useExpanded,
-    usePagination,  // new
+    onRowClick,
+    tableTitle,
+    tableHeader,
+    pagination
+  }: {
+    columns: ColumnDef<any>[];
+    data: any;
+    onRowClick?: (row: any) => void;
+    tableTitle?: {
+      title: string;
+      subtitle?: string;
+    };
+    tableHeader?: () => JSX.Element,
+    pagination?: PaginationInfo
+  }
+) {
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
   )
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = React.useState({})
+ 
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      
+    },
+    pageCount: pagination?.itemCount || 0,
+  })
+
+  React.useEffect(() => {
+    table.setPageCount(pagination?.itemCount || 0)
+  }, [data])
 
   // Render the UI for your table
   return (
@@ -164,152 +94,66 @@ function AppTable({ columns, data, onRowClick, tableTitle, tableHeader }: { colu
         {
           tableHeader?.()
         }
-        <div>
-          <GlobalFilter
-            preGlobalFilteredRows={preGlobalFilteredRows}
-            globalFilter={state.globalFilter}
-            setGlobalFilter={setGlobalFilter}
-          />
-          {headerGroups.map((headerGroup) =>
-            headerGroup.headers.map((column) =>
-              column.Filter ? (
-                <div className="mt-2 sm:mt-0" key={column.id}>
-                  {column.render("Filter")}
-                </div>
-              ) : null
-            )
-          )}
-        </div>
       </div>
+
       {/* table */}
       <div className="border-t border-gray-200 flex flex-col">
-        <table {...getTableProps()} className="min-w-full divide-y divide-gray-200 box-border items-start p-0 left-16 top-16 bg-white dark:bg-background border-gray-200 rounded-12">
-          <thead className="dark:bg-night">
-            {headerGroups.map((headerGroup, i1) => (
-              <tr key={i1} {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column, i2) => (
-                  // Add the sorting props to control sorting. For this example
-                  // we can add them into the header props
-                  <th
-                    key={i2}
-                    scope="col"
-                    className="group px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
-                    {...column.getHeaderProps(column.getSortByToggleProps())}
-                  >
-                    <div className="flex items-center justify-between">
-                      {column.render('Header')}
-                      {/* Add a sort direction indicator */}
-                      <span>
-                        {column.isSorted
-                          ? column.isSortedDesc
-                            ? <i className=" i-tabler-chevron-up w-4 h-4 text-gray-400" />
-                            : <i className=" i-tabler-chevron-down w-4 h-4 text-gray-400" />
-                          : (
-                            <i className=" i-tabler-minus w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100" />
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead className='px-6' key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
                           )}
-                      </span>
-                    </div>
-                  </th>
-                ))}
-              </tr>
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
             ))}
-          </thead>
-          <tbody
-            {...getTableBodyProps()}
-            className="bg-white dark:bg-background dark:text-white divide-y divide-gray-200"
-          >
-            {data?.length ? page.map((row, i) => {  // new
-              prepareRow(row)
-              return (
-                <tr key={i} {...row.getRowProps()} onClick={(e) => onRowClick?.(row)} className='cursor-pointer transition-colors hover:bg-gray-50'>
-                  {row.cells.map((cell, i2) => {
-                    return (
-                      <td
-                        key={i2}
-                        {...cell.getCellProps()}
-                        className="px-6 py-6 align-middle whitespace-nowrap"
-                        role="cell"
-                      >
-                        {cell.column.Cell.name === "defaultRenderer"
-                          ? <div className="text-sm text-gray-800">{cell.render('Cell')}</div>
-                          : cell.render('Cell')
-                        }
-                      </td>
-                    )
-                  })}
-                </tr>
-              )
-            }) : <tr >
-              <td className='py-7 text-center align-middle text-gray-400 w-full' colSpan={columns?.length}>No data</td>
-            </tr>}
-          </tbody>
-        </table>
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  onClick={() => onRowClick?.(row)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell className='px-6' key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
       {/* Pagination */}
-      <div className="py-3 px-6 flex items-center justify-between border-t border-gray-200">
-        <div className="flex-1 flex justify-between items-center">
-          <Button onClick={() => previousPage()} variant="ghost" size='sm' prefixIcon='i-tabler-arrow-left' disabled={!canPreviousPage}>Previous</Button>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
-            <div className="flex gap-x-2 items-baseline">
-              <span className="text-sm text-gray-700">
-                Page <span className="font-medium">{state.pageIndex + 1}</span> of <span className="font-medium">{pageOptions.length}</span>
-              </span>
-              <label>
-                <span className="sr-only">Items Per Page</span>
-                <select
-                  className="mt-1 block w-full rounded-md border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  value={state.pageSize}
-                  onChange={e => {
-                    setPageSize(Number(e.target.value))
-                  }}
-                >
-                  {[5, 10, 20].map(pageSize => (
-                    <option key={pageSize} value={pageSize}>
-                      Show {pageSize}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            {/* <div>
-              <nav className="relative z-0 inline-flex rounded-md -space-x-px" aria-label="Pagination">
-                <Button
-                  className="rounded-l-md"
-                  onClick={() => gotoPage(0)}
-                  disabled={!canPreviousPage}
-                >
-                  <span className="sr-only">First</span>
-                  <i className=" i-tabler-chevrons-left h-5 w-5 text-gray-400" aria-hidden="true" />
-                </Button>
-                <Button
-                  onClick={() => previousPage()}
-                  disabled={!canPreviousPage}
-                >
-                  <span className="sr-only">Previous</span>
-                  <i className="i-tabler-chevron-left h-5 w-5 text-gray-400" aria-hidden="true" />
-                </Button>
-                <Button
-                  onClick={() => nextPage()}
-                  disabled={!canNextPage
-                  }>
-                  <span className="sr-only">Next</span>
-                  <i className="i-tabler-chevrons-right h-5 w-5 text-gray-400" aria-hidden="true" />
-                </Button>
-                <Button
-                  className="rounded-r-md"
-                  onClick={() => gotoPage(pageCount - 1)}
-                  disabled={!canNextPage}
-                >
-                  <span className="sr-only">Last</span>
-                  <i className="i-tabler-chevron-right h-5 w-5 text-gray-400" aria-hidden="true" />
-                </Button>
-              </nav>
-            </div> */}
-          </div>
-          <Button onClick={() => nextPage()} size='sm' variant={'ghost'} suffixIcon='i-tabler-arrow-right' disabled={!canNextPage}>Next</Button>
+      {
+        pagination && <div className="py-3 px-6 flex items-center justify-between border-t border-gray-200">
+          <AppPagination table={table} pagination={pagination} />
         </div>
-       
-      </div>
+      }
     </div>
   )
 }

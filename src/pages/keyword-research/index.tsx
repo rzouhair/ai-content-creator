@@ -12,7 +12,7 @@ import { useRouter } from 'next/router'
 import { groupBy } from 'lodash-es'
 import { useAtom } from 'jotai'
 import { activeProject } from '@/stores/projects'
-import AppTable from '@/components/App/AppTable'
+import { PaginationInfo } from "@/lib/@types"
 import AppTag from '@/components/App/AppTag'
 import AppTooltip from '@/components/App/AppTooltip'
 import { deleteSuggestion, getSuggestions } from '@/api/suggestions'
@@ -26,6 +26,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@/components/App/AppDataTable/DataTable';
 
 function KeywordResearch() {
 
@@ -44,6 +46,29 @@ function KeywordResearch() {
   const [bingSuggestions, setBingSuggestions] = useState<string[]>([])
   const [ddgSuggestions, setDdgSuggestions] = useState<string[]>([])
   const [groupedSuggestions, setGroupedSuggestions] = useState([])
+  const [pagination, setPagination] = React.useState<PaginationInfo>({
+    itemCount: 0,
+    pageSize: 10,
+    page: 1,
+    pageCount: 1,
+  })
+
+  function onUpdatePage(page: number) {
+    setPagination({
+      ...pagination,
+      page,
+    } as PaginationInfo)
+
+    console.log("Page changed here: " + page)
+  }
+  function onUpdatePageSize(pageSize: number) {
+    setPagination({
+      ...pagination,
+      pageSize,
+      pageCount: 1
+    } as PaginationInfo)
+    console.log("Page size changed here: " + pageSize)
+  }
 
   const changeHandler = async(e: any) => {
     setKeyword(e.target.value)
@@ -160,19 +185,20 @@ function KeywordResearch() {
   }, [keyword, checked, country])
 
 
-  const columns = React.useMemo(() => [
+  const columns = React.useMemo<ColumnDef<any>[]>(() => [
     {
-      Header: "Query",
-      accessor: 'search_query',
+      header: "Query",
+      accessorKey: 'search_query',
     },
     {
-      Header: "Search keyword",
-      accessor: 'parent_keyword',
+      header: "Search keyword",
+      accessorKey: 'parent_keyword',
     },
     {
-      Header: "Status",
-      accessor: 'status',
-      Cell: ({ value }: { value: string }) => {
+      header: "Status",
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const value: string = row.original.status || ''
         return <AppTag color={
           value === 'ANALYZED' ? 'green'
           : value === 'IN_PROGRESS' ? 'yellow'
@@ -182,10 +208,10 @@ function KeywordResearch() {
       }
     },
     {
-      Header: "Actions",
+      header: "Actions",
       id: 'expander',
-      Cell: ({ row }: { row: any }) => {
-        const sgs: Suggestion = row.original
+      cell: ({ row }) => {
+        const sgs: Suggestion = row.original || {}
         return <div className='flex items-center gap-3 flex-wrap justify-start'>
           <div className='flex flex-wrap gap-2 items-center justify-end'>
             <AppTooltip content={
@@ -322,17 +348,13 @@ function KeywordResearch() {
   }
 
   return (
-    <div className='p-4 relative bg-background'>
+    <div className='p-4 relative bg-background min-h-screen'>
       <div className='relative'>
         <Card className={'max-w-2xl mx-auto z-20 relative overflow-visible'}>
-          <CardHeader>
-            <CardTitle className='font-bold'>Keyword research</CardTitle>
-            <CardDescription>Discover dozens of relevant keyword clusters in a matter of minutes</CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className='pt-6'>
             <AppInput
               placeholder='e.g. Best SEO tool'
-              hint='Only one keyword can be added'
+              hint='Acts as a search engine input'
               label="Keyword"
               prefix={<i className='i-tabler-key'></i>}
               value={keyword}
@@ -357,7 +379,7 @@ function KeywordResearch() {
           </div>
             <div className='border-t border-dashed border-gray-400 my-6 pt-3'>
               <AppCheckbox checked={checked} id={'with-styling'} onChange={(e) => {
-                setChecked(e.target.checked)
+                setChecked(e)
               }}>
                 Get suggestions with styling
               </AppCheckbox>
@@ -373,9 +395,12 @@ function KeywordResearch() {
         }
       </div>
       <div className='flex flex-col gap-4 my-4'>
-        <AppTable
+        <DataTable
+          pagination={pagination}
           columns={columns}
           data={selectedSuggestions}
+          onUpdatePage={onUpdatePage}
+          onUpdatePageSize={onUpdatePageSize}
           tableTitle={{
             title: 'Suggestions',
             subtitle: 'Analyze google search suggestions to get related questions and PPA'
@@ -387,7 +412,10 @@ function KeywordResearch() {
 }
 
 KeywordResearch.getLayout = (page: any) => {
-  return <LayoutMain>
+  return <LayoutMain
+    title="Keyword research"
+    description="Discover dozens of relevant keyword clusters in a matter of minutes"
+  >
     {page}
   </LayoutMain>
 }

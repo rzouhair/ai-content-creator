@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Tab } from '@headlessui/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(' ')
@@ -12,39 +12,30 @@ interface Tabs {
 export default function AppTabs({ tabs }: { tabs: Tabs }) {
 
   return (
-    <div className="w-full px-2 sm:px-0">
-      <Tab.Group>
-        <Tab.List className="flex space-x-1 rounded-xl bg-transparent p-1">
+    <div className="w-full">
+      <Tabs defaultValue={Object.keys(tabs)?.[0]}>
+        <TabsList className="flex space-x-1 overflow-x-auto scrollbar-none rounded-xl">
           {Object.keys(tabs).map((tab) => (
-            <Tab
+            <TabsTrigger
               key={tab}
-              className={({ selected }) =>
-                classNames(
-                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700 transition-colors',
-                  selected
-                    ? 'text-indigo-500 bg-indigo-100'
-                    : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'
-                )
-              }
+              value={tab}
+              className='w-full rounded-lg text-sm font-medium leading-5 transition-colors'
             >
               {tab}
-            </Tab>
+            </TabsTrigger>
           ))}
-        </Tab.List>
-        <Tab.Panels className="mt-2">
-          {Object.values(tabs).map((children, idx) => (
-            <Tab.Panel
+        </TabsList>
+        <div className="mt-2">
+          {Object.entries(tabs).map(([val, children], idx) => (
+            <TabsContent
               key={idx}
-              className={classNames(
-                'rounded-xl bg-transparent p-3 !outline-none',
-                
-              )}
+              value={val}
             >
               {children()}
-            </Tab.Panel>
+            </TabsContent>
           ))}
-        </Tab.Panels>
-      </Tab.Group>
+        </div>
+      </Tabs>
     </div>
   )
 }

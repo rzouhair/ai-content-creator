@@ -327,19 +327,32 @@ async function loadAnswer(mAppended: any) {
           <div className="sticky bottom-0 left-0 right-0 py-4 bg-white">
             {!currentChat?.messages?.length || currentChat?.messages?.length <= 0 ? (
               <div className="mb-3 flex items-center justify-center flex-wrap">
-                <Button onClick={() => setSystemPromptsOpen(true)}>
-                  Change system prompt
-                </Button>
+                <SystemPromptModal
+                  trigger={<Button onClick={() => setSystemPromptsOpen(true)}>
+                    Change system prompt
+                  </Button>}
+                  open={systemPromptsOpen}
+                  onClose={(closed: boolean, character: any) => {
+                    if (character?.prompt) {
+                      setSystemPrompt(character.prompt);
+                      setMessages([
+                        { role: "system", content: character.prompt },
+                        ...messages.filter((message) => message.role !== "system"),
+                      ]);
+                    }
+                    setSystemPromptsOpen(false);
+                  }}
+                />
               </div>
             ) : null}
 
             {currentChat?.messages?.length && currentChat?.messages?.length > 0 ? (
               <div className="mb-3 flex items-center justify-center flex-wrap">
-                {(isStream && loadingAnswer) && <Button background='red' prefixIcon='i-tabler-reload' disabled={!loadingAnswer} onClick={abortStream}>
+                {(isStream && loadingAnswer) && <Button variant='destructive' prefix='i-tabler-reload' disabled={!loadingAnswer} onClick={abortStream}>
                   Stop Answer
                 </Button>}
                 {
-                  !loadingAnswer && <Button background='pink' prefixIcon='i-tabler-reload' disabled={loadingAnswer} onClick={regeneateResponse}>
+                  !loadingAnswer && <Button prefix='i-tabler-reload' disabled={loadingAnswer} onClick={regeneateResponse}>
                     Regenerate response
                   </Button>
                 }
@@ -368,19 +381,6 @@ async function loadAnswer(mAppended: any) {
               </span>
             </div>
           </div>
-          <SystemPromptModal
-            open={systemPromptsOpen}
-            onClose={(closed: boolean, character: any) => {
-              if (character?.prompt) {
-                setSystemPrompt(character.prompt);
-                setMessages([
-                  { role: "system", content: character.prompt },
-                  ...messages.filter((message) => message.role !== "system"),
-                ]);
-              }
-              setSystemPromptsOpen(false);
-            }}
-          />
         </div>
       </div>
     </main>

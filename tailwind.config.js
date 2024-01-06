@@ -25,6 +25,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        text: 'var(--text)',
         night: {
           DEFAULT: "#000f08",
           foreground: "#FFF",

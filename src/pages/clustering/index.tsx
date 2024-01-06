@@ -6,9 +6,9 @@ import LayoutMain from '@/components/Layouts/LayoutMain';
 import { useAtom } from 'jotai';
 import { sideBarTheme } from '@/stores/theme';
 import { Button } from '@/components/ui/button';;
-import { Key, useEffect, useState } from 'react';
+import { Key, useEffect, useMemo, useState } from 'react';
 import KeywordsListCreation from '@/components/Clustering/KeywordsListCreation';
-import { Keywords } from '@/lib/@types';
+import { Keywords, PaginationInfo } from '@/lib/@types';
 import { deleteKeywordsList, getKeywordsLists } from '@/api/keywords';
 import AppCard from '@/components/App/AppCard';
 import { useRouter } from 'next/router';
@@ -19,15 +19,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '@/components/ui/badge';
+import { DoorOpen, Trash } from 'lucide-react';
+import { DataTable } from '@/components/App/AppDataTable/DataTable';
 
 const inter = Inter({ subsets: ['latin'] })
-
 export default function Clustering() {
 
   const router = useRouter()
 
   const [creationModalOpen, setCreationModalOpen] = useState<boolean>(false)
   const [keywordsLists, setKeywordsLists] = useState<Keywords[]>([])
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    itemCount: 0,
+    pageSize: 10,
+    page: 1,
+    pageCount: 1,
+  })
+
+  function onUpdatePage(page: number) {
+    setPagination({
+      ...pagination,
+      page,
+    } as PaginationInfo)
+
+    console.log("Page changed here: " + page)
+  }
+  function onUpdatePageSize(pageSize: number) {
+    setPagination({
+      ...pagination,
+      pageSize,
+      pageCount: 1
+    } as PaginationInfo)
+    console.log("Page size changed here: " + pageSize)
+  }
 
   useEffect(() => {
     getKeywords()
@@ -57,39 +83,73 @@ export default function Clustering() {
     await getKeywords()
   }
 
+  const columns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      header: "Title",
+      accessorKey: 'title',
+    },
+    {
+      header: "Keywords count",
+      cell({ row }) {
+        return <p>{row.original?.embeddings.length}</p>
+      }
+    },
+    {
+      header: "Status",
+      cell({ row }) {
+        const list = row.original
+        return list.saved_cluster && Object.values(list.saved_cluster).length
+          ? <Badge variant='secondary'>Clustered</Badge>
+          : <Badge variant='default'>Created</Badge>
+      }
+    },
+    {
+      header: "Actions",
+      cell({ row }) {
+        const list = row.original
+        return <div>
+          <div className='flex items-center gap-2'>
+            <Button size='icon' onClick={() => router.push(`/clustering/${list._id}`)}>
+              <DoorOpen className='w-5 h-5' />
+            </Button>
+            <Button size='icon' variant='destructive' onClick={() => deleteList(list._id)}>
+              <Trash className='w-5 h-5' />
+            </Button>
+          </div>
+        </div>
+      }
+    },
+  ], [deleteList])
+
   return (
     <div>
-      <div className='flex items-center justify-between gap-4 px-4'>
-        <h1 className='font-bold'>Keywords Clustering</h1>
-        <Button onClick={() => setCreationModalOpen(true)}>Create Keywords List</Button>
+      <div>
+        <DataTable
+          columns={columns}
+          data={keywordsLists}
+          tableTitle={{
+            title: "All Keywords Lists",
+          }}
+          tableHeader={() =>
+            <KeywordsListCreation
+              trigger={<Button onClick={() => setCreationModalOpen(true)}>Create Keywords List</Button>}
+              open={creationModalOpen}
+              onClose={closeKeywordsCreationModal}
+            />
+          }
+          pagination={pagination}
+        />
       </div>
-
-      <div className='grid grid-cols-3 gap-4'>
-        {
-          keywordsLists.map((list: Keywords) => <Card key={list._id}>
-            <CardHeader>
-              <CardTitle>{ list.title }</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className='mt-2 mb-4'>Number of Keywords: { list.embeddings.length }</p>
-              <p className='mt-2 mb-4'>Clustered ? { list.saved_cluster && Object.values(list.saved_cluster).length ? 'Yes' : 'No' }</p>
-              <div className='flex items-center justify-between mt-4'>
-                <Button onClick={() => router.push(`/clustering/${list._id}`)}>Access List</Button>
-                <Button background='red' onClick={() => deleteList(list._id)}>Delete List</Button>
-              </div>
-            </CardContent>
-          </Card>)
-        }
-      </div>
-
-      <KeywordsListCreation open={creationModalOpen} onClose={closeKeywordsCreationModal} />
     </div>
   )
 }
 
 Clustering.getLayout = function getLayout(page: any) {
   return (
-    <LayoutMain>
+    <LayoutMain
+      title="Keywords Clustering"
+      description="Organize your keywords list by clustering them by similarity and relevance"
+    >
       {page}
     </LayoutMain>
   )
