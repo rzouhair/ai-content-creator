@@ -62,10 +62,10 @@ export default function LoginPage({ className, ...props }: UserAuthFormProps) {
       if (signupRes && !signupRes?.token && Object.values(signupRes).length > 0)
         throw new Error("An error occurred !\n" + (signupRes ? Object.values(signupRes).flat(1)?.[0] : ''))
       if (signupRes?.token) {
-        toast("Login successful")
+        toast("Sign up successful")
         localStorage.setItem('rb_access_token', signupRes.token)
         localStorage.setItem('rb_refresh_token', signupRes.refresh)
-        router.push('/')
+        await router.push('/')
       }
     } catch (error: any) {
       toast(error.message)

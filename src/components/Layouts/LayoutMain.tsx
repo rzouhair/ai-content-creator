@@ -8,6 +8,7 @@ import { Skill } from '@/lib/@types'
 import skillsObj from '@/lib/skills'
 import { activeProject } from '@/stores/projects'
 import { TooltipProvider } from '../ui/tooltip'
+import { getSkills } from '@/api/skills'
 
 function LayoutMain(props: any) {
 
@@ -71,12 +72,10 @@ function LayoutMain(props: any) {
 
     async function fetchSkills() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/`);
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-        const data = await response.json();
-        _setSkills(data);
+        const data = await getSkills()
+        console.log(data)
+        if (data?.length)
+          _setSkills(data);
       } catch (error) {
         console.error(error);
       }

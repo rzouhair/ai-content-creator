@@ -1,16 +1,18 @@
-import { Document, Project, Search, Suggestion } from "@/lib/@types";
+import { Document, PaginatedResponse, Project, Search, Suggestion } from "@/lib/@types";
+import axios from "@/lib/axios";
 
-const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/keyword-research/suggestions/`;
 
-export const getSuggestions = async (): Promise<Suggestion[] | undefined> => {
+const apiUrl = `/keyword-research/suggestions/`;
+
+export const getSuggestions = async (params?: Record<string, any>): Promise<PaginatedResponse<Suggestion[]> | undefined> => {
   try {
-    const res = await fetch(apiUrl);
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
+    const res = await axios.get(apiUrl, {
+      params: params || {},
+    });
+    console.log({
+      res
+    })
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -18,13 +20,8 @@ export const getSuggestions = async (): Promise<Suggestion[] | undefined> => {
 
 export const getSuggestionById = async (id: string): Promise<Suggestion | undefined> => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/`);
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
+    const res = await axios.get(`${apiUrl}/${id}/`);
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -32,13 +29,8 @@ export const getSuggestionById = async (id: string): Promise<Suggestion | undefi
 
 export const getSuggestionSearch = async (id: string): Promise<Search | undefined> => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/search`);
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data as Search;
+    const res = await axios.get(`${apiUrl}/${id}/search`);
+    return res.data as Search;
   } catch (error) {
     console.error(error);
   }
@@ -46,17 +38,12 @@ export const getSuggestionSearch = async (id: string): Promise<Search | undefine
 
 export const createSuggestion = async (payload: any) => {
   try {
-    const res = await fetch(apiUrl, {
-      method: 'POST',
+    const res = await axios.post(apiUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -64,17 +51,12 @@ export const createSuggestion = async (payload: any) => {
 
 export const updateSuggestion = async (id: string, payload: any) => {
   try {
-    const res = await fetch(`${apiUrl}/${id}/`, {
-      method: 'POST', // Change this to 'PUT' if the API requires a PUT request for updates
+    const res = await axios.post(`${apiUrl}/${id}/`, payload, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -82,13 +64,7 @@ export const updateSuggestion = async (id: string, payload: any) => {
 
 export const deleteSuggestion = async (id: string) => {
   try {
-    const res = await fetch(`${apiUrl}${id}/`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    await axios.delete(`${apiUrl}${id}/`);
   } catch (error) {
     console.error(error);
   }

@@ -1,28 +1,21 @@
 import { Project } from "@/lib/@types";
+import axios from "@/lib/axios";
+
+const apiUrl = `/content-gen/projects/`;
 
 export const getProjects = async (): Promise<Project[] | undefined> => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/projects/`);
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
+    const res = await axios.get(apiUrl);
+    return res.data;
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 export const getProjectById = async (id: string): Promise<Project | undefined> => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/projects/${id}/`);
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
+    const res = await axios.get(`${apiUrl}/${id}/`);
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -30,17 +23,12 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
 
 export const createProject = async (payload: any) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/projects/`, {
-      method: 'POST',
+    const res = await axios.post(apiUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -48,17 +36,12 @@ export const createProject = async (payload: any) => {
 
 export const updateProject = async (id: string, payload: any) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/projects/${id}/`, {
-      method: 'POST', // Change this to 'PUT' if the API requires a PUT request for updates
+    const res = await axios.put(`${apiUrl}/${id}/`, payload, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -66,13 +49,7 @@ export const updateProject = async (id: string, payload: any) => {
 
 export const deleteProject = async (id: string) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/projects/${id}/`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    await axios.delete(`${apiUrl}/${id}/`);
   } catch (error) {
     console.error(error);
   }

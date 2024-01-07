@@ -118,3 +118,11 @@ export interface PaginationInfo {
   pageCount: number
   itemCount: number | undefined
 }
+
+export interface PaginatedResponse<T> {
+  page: number;
+  page_size: number;
+  page_count: number;
+  items_count: number;
+  data: T
+}

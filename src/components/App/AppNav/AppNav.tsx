@@ -42,11 +42,6 @@ function AppNav(props: { navCollapsed?: boolean }) {
 
   const [bottomNavItems] = useState<NavLink[]>([
     {
-      to: "/support",
-      icon: "i-tabler-lifebuoy",
-      title: "Support",
-    },
-    {
       to: "/settings",
       icon: "i-tabler-settings",
       title: "Settings",
@@ -55,11 +50,11 @@ function AppNav(props: { navCollapsed?: boolean }) {
       to: "#",
       icon: "i-tabler-door",
       title: "Logout",
-      onClick: (e: any) => {
+      onClick: async(e: any) => {
         e.preventDefault()
         localStorage.removeItem('rb_access_token')
         localStorage.removeItem('rb_refresh_token')
-        router.push('/login')
+        await router.push('/login')
       }
     },
   ]);

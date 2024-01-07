@@ -12,6 +12,7 @@ import AppTabs from '@/components/App/AppTabs';
 import { Select } from '@/components/ui/select';
 import AppListbox from '@/components/App/AppListbox';
 import { Badge } from '@/components/ui/badge';
+import { getSkillOutputs } from '@/api/skills';
 
 function Tools() {
 
@@ -39,14 +40,7 @@ function Tools() {
         setGeneratedData([]);
         return;
       }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/${selectedSkill._id}/outputs/`);
-      
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-
-      const outputs = await response.json();
+      const outputs = await getSkillOutputs(selectedSkill._id)
 
       setGeneratedData(outputs);
     } catch (error) {

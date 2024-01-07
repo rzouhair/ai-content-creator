@@ -1,21 +1,17 @@
+import { Skill } from '@/lib/@types';
+import axios from '@/lib/axios';
+
 export const executeSkill = async (payload: {
   skill_id: string;
   inputs: any;
 }) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/execute/`, {
-      method: 'POST',
+    const res = await axios.post(`/content-gen/execute/`, payload, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -24,24 +20,32 @@ export const executeSkill = async (payload: {
 export const getCompletion = async (payload: {
   command: string;
   context: string;
-}): Promise<Response | undefined> => {
+}): Promise<any | undefined> => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/completion/`, {
-      method: 'POST',
+    const res = await axios.post(`/content-gen/completion/`, payload, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
     });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json()
-    console.log({
-      res: data
-    })
-    return data;
+    return res.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getSkillOutputs = async (skillId: string): Promise<any | undefined> => {
+  try {
+    const res = await axios.get(`/content-gen/skills/${skillId}/outputs/`);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getSkills = async (): Promise<Skill[] | undefined> => {
+  try {
+    const res = await axios.get(`/content-gen/skills/`);
+    return res.data;
   } catch (error) {
     console.error(error);
   }

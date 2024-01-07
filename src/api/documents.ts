@@ -1,17 +1,13 @@
 import { Document } from "@/lib/@types";
+import axiosInstance from "@/lib/axios";
 
 const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/documents/`;
 
 export const getDocuments = async (project?: string): Promise<Document[] | undefined> => {
   try {
     const params = new URLSearchParams(project ? { project } : {});
-    const res = await fetch(`${apiUrl}?${params.toString()}`);
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data || [];
+    const res = await axiosInstance.get(`${apiUrl}?${params.toString()}`);
+    return res.data || [];
   } catch (error) {
     console.error(error);
   }
@@ -19,13 +15,8 @@ export const getDocuments = async (project?: string): Promise<Document[] | undef
 
 export const getDocumentById = async (id: string): Promise<Document | undefined> => {
   try {
-    const res = await fetch(`${apiUrl}${id}/`);
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
+    const res = await axiosInstance.get(`${apiUrl}${id}/`);
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -39,17 +30,8 @@ export const createDocument = async (payload: {
   project: string;
 }) => {
   try {
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    const res = await axiosInstance.post(apiUrl, payload);
+    return res.data
   } catch (error) {
     console.error(error);
   }
@@ -57,17 +39,8 @@ export const createDocument = async (payload: {
 
 export const updateDocument = async (id: string, payload: any) => {
   try {
-    const res = await fetch(`${apiUrl}${id}/`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    const res = await axiosInstance.put(`${apiUrl}${id}/`, payload);
+    return res.data
   } catch (error) {
     console.error(error);
   }
@@ -75,13 +48,7 @@ export const updateDocument = async (id: string, payload: any) => {
 
 export const deleteDocument = async (id: string) => {
   try {
-    const res = await fetch(`${apiUrl}${id}/`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
-      throw new Error(`Request failed with status ${res.status}`);
-    }
+    await axiosInstance.delete(`${apiUrl}${id}/`);
   } catch (error) {
     console.error(error);
   }

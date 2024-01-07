@@ -14,11 +14,14 @@ import { LoginPayload, login } from "@/api/users"
 import { useRouter } from "next/router"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
+import { EyeOff, Eye } from "lucide-react"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 interface Inputs extends LoginPayload {}
 
 export default function LoginPage({ className, ...props }: UserAuthFormProps) {
+
+  const [isPasswordShown, setPasswordShown] = React.useState<boolean>(false)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const router = useRouter()
   const {
@@ -31,20 +34,18 @@ export default function LoginPage({ className, ...props }: UserAuthFormProps) {
   async function onSubmit({ email, password }: Inputs) {
     try {
       setIsLoading(true)
-      console.log({
-        email,
-        password
-      })
       const loginRes = await login({
         email,
         password
       })
-      if (!loginRes)
-        throw new Error("An error occurred")
+      if (!loginRes?.token) {
+        toast("Incorrect credentials")
+        return
+      }
       localStorage.setItem('rb_access_token', loginRes.token)
       localStorage.setItem('rb_refresh_token', loginRes.refresh)
       toast("Login Successful")
-      router.push('/')
+      await router.push('/')
     } catch (error: any) {
       toast("An error occurred ! " + error.message)
     } finally {
@@ -82,17 +83,27 @@ export default function LoginPage({ className, ...props }: UserAuthFormProps) {
                 />
               </div>
               <div className="grid gap-2">
+
                 <Label htmlFor="password">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  {...register('password')}
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={isPasswordShown ? 'text' : 'password'} 
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    {...register('password')}
+                    disabled={isLoading}
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 cursor-pointer">
+                    {isPasswordShown ? (
+                      <EyeOff className="h-5 w-5" onClick={() => setPasswordShown(false)}/>
+                    ) : (
+                      <Eye className="h-5 w-5" onClick={() => setPasswordShown(true)}/>
+                    )}
+                  </div>
+                </div>
               </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && (

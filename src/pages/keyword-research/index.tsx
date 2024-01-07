@@ -54,19 +54,25 @@ function KeywordResearch() {
   })
 
   function onUpdatePage(page: number) {
-    setPagination({
-      ...pagination,
-      page,
-    } as PaginationInfo)
+    setPagination((prev: PaginationInfo) => {
+      fetchSuggestions(page, prev.pageSize)
+      return {
+        ...prev,
+        page,
+      } as PaginationInfo
+    })
 
     console.log("Page changed here: " + page)
   }
   function onUpdatePageSize(pageSize: number) {
-    setPagination({
-      ...pagination,
-      pageSize,
-      pageCount: 1
-    } as PaginationInfo)
+    setPagination((prev) => {
+      fetchSuggestions(prev.page, pageSize)
+      return {
+        ...prev,
+        pageSize,
+      } as PaginationInfo
+    })
+    fetchSuggestions()
     console.log("Page size changed here: " + pageSize)
   }
 
@@ -74,9 +80,23 @@ function KeywordResearch() {
     setKeyword(e.target.value)
   }
 
-  async function fetchSuggestions() {
+  async function fetchSuggestions(page = pagination.page, pageSize = pagination.pageSize) {
     try {
-      const res = await axios.get('/keyword-research/suggestions/')
+      setLoading(true)
+      const res = await getSuggestions({
+        page: page,
+        page_size: pageSize,
+      })
+      if(!res?.data)
+        return
+
+      setPagination({
+        ...pagination,
+        page: res.page,
+        pageSize: res.page_size,
+        pageCount: res.page_count,
+        itemCount: res.items_count,
+      })
       setSelectedSuggestions(res.data)
 
       const gSuggestions = groupBy((res.data as Suggestion[]), 'parent_keyword');
@@ -85,6 +105,8 @@ function KeywordResearch() {
       console.log({ gSuggestions })
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -120,7 +142,7 @@ function KeywordResearch() {
       console.log(suggestionsData)
 
       if (suggestionsData)
-        setSelectedSuggestions(suggestionsData)
+        setSelectedSuggestions(suggestionsData.data)
 
     } catch (error) {
       console.error(error)
@@ -398,6 +420,7 @@ function KeywordResearch() {
         <DataTable
           pagination={pagination}
           columns={columns}
+          loading={loading}
           data={selectedSuggestions}
           onUpdatePage={onUpdatePage}
           onUpdatePageSize={onUpdatePageSize}

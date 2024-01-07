@@ -42,7 +42,7 @@ export default function LayoutAuth(props: any) {
   }, [])
 
   return (
-    <div className="flex items-center justify-center h-screen w-screen bg-primary-300 px-4">
+    <div className="flex items-center justify-center h-screen w-screen bg-primary-400 px-4">
       <div className="container relative flex pb-8 md:pb-0 md:h-[700px] w-fit md:max-w-[1280px] md:w-full mx-auto flex-col items-center justify-center md:grid lg:grid-cols-2 lg:px-0 rounded-md border-muted-foreground border overflow-hidden bg-background">
         {props.links}
         <div className="relative hidden h-full flex-col bg-secondary p-10 text-white lg:flex dark:border-r">

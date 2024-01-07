@@ -23,8 +23,9 @@ function ContentStructure({ document }: { document: Document | null }) {
     try {
       const suggestionsRes = await getSuggestions()
 
+      console.log(suggestionsRes)
       if (suggestionsRes) {
-        setSuggestions(suggestionsRes)
+        setSuggestions(suggestionsRes.data)
         setIsChoosingSuggestion(true)
       }
     } catch (error) {

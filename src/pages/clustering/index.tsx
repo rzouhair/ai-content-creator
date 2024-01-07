@@ -91,7 +91,9 @@ export default function Clustering() {
     {
       header: "Keywords count",
       cell({ row }) {
-        return <p>{row.original?.embeddings.length}</p>
+        const list = row.original.saved_cluster
+        const keywordsCount: number = list.reduce((acc: number, li: any) => acc + li.keywords.length, 0) 
+        return <p>{keywordsCount}</p>
       }
     },
     {
