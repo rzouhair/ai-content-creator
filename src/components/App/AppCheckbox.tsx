@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Checkbox } from '../ui/checkbox';
 import { CheckedState } from '@radix-ui/react-checkbox';
 
-export default function AppCheckbox({ className, partiallyChecked, children, checked, onChange, id }: { className?: string; partiallyChecked?: boolean; children?: any; checked?: boolean; onChange?: (checked: any) => void; id: string }) {
+export default function AppCheckbox({ className, partiallyChecked, children, checked, onChange, id, ...rest }: { className?: string; partiallyChecked?: boolean; children?: any; checked?: boolean; onChange?: (checked: any) => void; id: string }) {
 
   const classesByState = {
     unchecked: 'border border-gray-300 bg-white',
@@ -28,7 +28,7 @@ export default function AppCheckbox({ className, partiallyChecked, children, che
 
   return (
     <div className="flex items-center space-x-2">
-      <Checkbox id={id} checked={checked} onCheckedChange={onChange} />
+      <Checkbox id={id} checked={checked} onCheckedChange={onChange} {...rest} />
       <label
         htmlFor={id}
         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

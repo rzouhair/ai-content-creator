@@ -4,13 +4,13 @@ import characters from '@/lib/characters'
 import { Button } from '@/components/ui/button'
 import AppInput from '../App/AppInput'
 import AppTextarea from '../App/AppTextArea'
-import { createProject, getProjects } from '@/api/projects'
-import { setProjects as _setProjects } from '@/stores/projects'
+import * as appStore from '@/stores/app'
 import { useAtom } from 'jotai'
 import { createKeywordsList } from '@/api/keywords'
 
 function KeywordsListCreation(props: any) {
 
+  const [activeProject] = useAtom(appStore.activeProject)
   const [title, setTitle] = useState('')
   const [keywordsList, setKeywordsList] = useState('')
   
@@ -34,6 +34,7 @@ function KeywordsListCreation(props: any) {
       await createKeywordsList({
         title,
         keywords: list,
+        project: activeProject?._id
       })
 
       props.onClose(false)

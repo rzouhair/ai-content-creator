@@ -19,7 +19,8 @@ function ModalBase(props: {
   trigger: JSX.Element,
   footer?: JSX.Element,
   children: any;
-  className: string
+  className?: string;
+  contentClassName?: string;
 }) {
 
   function onOpenChanged(open: boolean) {
@@ -35,7 +36,7 @@ function ModalBase(props: {
       <DialogTrigger asChild>
         {props.trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={`${props.contentClassName || ''}`}>
         <DialogHeader>
           <DialogTitle>{props.title}</DialogTitle>
           {props.description && <DialogDescription>

@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import AppTable, { AvatarCell, PaginationInfo, SelectColumnFilter, StatusPill } from '@/components/App/AppTable';
 import NewDocument from '@/components/Modals/NewDocument';
 import { useAtom } from 'jotai';
-import { activeProject } from '@/stores/projects';
+import { activeProject } from '@/stores/app';
 import { setActiveDocumentAtom } from '@/stores/documents';
 import { Button } from '@/components/ui/button';
 import { ColumnDef } from '@tanstack/react-table';

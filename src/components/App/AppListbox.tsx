@@ -11,15 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-interface ListBoxProps extends Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, 'onChange'> {
+interface ListBoxProps {
   options: { label: string; value: string; }[]
   label?: string
-  value: string
-  onChange?: Function
+  value?: string
+  onChange?: Function,
+  disabled?: boolean,
 }
 
 export default function AppListbox(props: ListBoxProps) {
-  const [selected, setSelected] = useState(props.value || props.options?.[0].value)
+  const [selected, setSelected] = useState(props.value || props.options?.[0]?.value)
   const [selectedLabel, setSelectedLabel] = useState(props.options?.find((o) => o.value === selected)?.label)
 
   useEffect(() => {
@@ -28,13 +29,13 @@ export default function AppListbox(props: ListBoxProps) {
   }, [selected, props])
 
   useEffect(() => {
-    setSelected(props.value)
+    setSelected(props.value || '')
   }, [props])
 
   return (
     <div className="flex gap-2 w-full flex-col">
       { props.label && <label className="text-base font-semibold">{props.label}</label> }
-      <Select onValueChange={setSelected} defaultValue={selected}>
+      <Select {...props} onValueChange={setSelected} defaultValue={selected} disabled={props.disabled}>
         <SelectTrigger className='outline-none ring-transparent focus:ring-1 focus:ring-secondary focus:ring-offset-0'>
           <SelectValue className='outline-none ring-transparent focus:ring-1 focus:ring-secondary focus:ring-offset-0' placeholder={selectedLabel} />
         </SelectTrigger>

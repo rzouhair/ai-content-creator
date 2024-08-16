@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import AppInput from '../App/AppInput'
 import AppTextarea from '../App/AppTextArea'
 import { createProject, getProjects } from '@/api/projects'
-import { setProjects as _setProjects } from '@/stores/projects'
+import { setProjects as _setProjects } from '@/stores/app'
 import { useAtom } from 'jotai'
 
 function SystemPromptModal(props: any) {

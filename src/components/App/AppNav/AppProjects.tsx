@@ -4,7 +4,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 import AppInput from '../AppInput'
 import NewProject from '@/components/Modals/NewProject'
 import { getProjects } from '@/api/projects'
-import { setProjects as _setProjects, projects as _projects, activeProject as _activeProject, setActiveProject } from '@/stores/projects'
+import { setProjects as _setProjects, projects as _projects, activeProject as _activeProject, setActiveProject } from '@/stores/app'
 import { useAtom } from 'jotai'
 import { Project } from '@/lib/@types'
 

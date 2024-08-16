@@ -6,7 +6,7 @@ import ContentSidebar from "@/components/Content/ContentSidebar";
 import ContentStructure from "@/components/Content/ContentStructure";
 import LayoutMain from "@/components/Layouts/LayoutMain";
 import { activeDocumentAtom, setActiveDocumentAtom } from "@/stores/documents";
-import { activeProject } from "@/stores/projects";
+import { activeProject } from "@/stores/app";
 import { sideBarTheme } from "@/stores/theme";
 import { useAtom } from "jotai";
 import { useRouter } from "next/router";
@@ -148,7 +148,7 @@ function ContentDocument() {
           />
         </div>
       )}
-      <ContentStructure document={activeDocument} />
+      {/* <ContentStructure document={activeDocument} /> */}
     </div>
   );
 }

@@ -19,6 +19,8 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { ObjectSchema } from "yup"
 import { toast } from "sonner"
+import { loggedInUser } from "@/stores/app"
+import { useAtomValue, useSetAtom } from "jotai"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -46,6 +48,7 @@ export default function LoginPage({ className, ...props }: UserAuthFormProps) {
     resolver: yupResolver(schema)
   })
 
+  const setUser = useSetAtom(loggedInUser)
   const router = useRouter()
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
@@ -53,9 +56,6 @@ export default function LoginPage({ className, ...props }: UserAuthFormProps) {
   const [isPasswordShown, setPasswordShown] = React.useState<boolean>(false)
 
   async function onSubmit(data: Inputs) {
-    console.log({
-      data
-    })
     try {
       setIsLoading(true)
       const signupRes = await signup({ ...data, is_admin: false } as SignupPayload)
@@ -65,6 +65,7 @@ export default function LoginPage({ className, ...props }: UserAuthFormProps) {
         toast("Sign up successful")
         localStorage.setItem('rb_access_token', signupRes.token)
         localStorage.setItem('rb_refresh_token', signupRes.refresh)
+        setUser(signupRes.user)
         await router.push('/')
       }
     } catch (error: any) {

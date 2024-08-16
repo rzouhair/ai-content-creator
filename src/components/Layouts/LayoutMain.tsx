@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import AppNav from '../App/AppNav/AppNav'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { sideBarTheme } from '@/stores/theme'
 import { setSkills, skills } from '@/stores/templates'
 import { Skill } from '@/lib/@types'
 
 import skillsObj from '@/lib/skills'
-import { activeProject } from '@/stores/projects'
+import { activeProject } from '@/stores/app'
 import { TooltipProvider } from '../ui/tooltip'
 import { getSkills } from '@/api/skills'
+import { me } from '@/api/users'
+import { loggedInUser } from '@/stores/app'
+import { toast } from 'sonner'
+import axios from '@/lib/axios'
 
 function LayoutMain(props: any) {
 
+  const setUser = useSetAtom(loggedInUser)
   const [theme] = useAtom(sideBarTheme)
   const isPadded = props.padded === undefined || props.padded === true
 
@@ -25,18 +30,9 @@ function LayoutMain(props: any) {
       try {
         const tagsObj = Array.from(new Set(skillsObj.map((s) => s.tags.split(',')).flat(Infinity).filter((t: string) => t !== '')));
 
-        const tagsPromises = await Promise.all(tagsObj.map((t) => fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/tags/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: t,
-          }),
-        })));
-
-        const tagsResponses = await Promise.all(tagsPromises);
-        const tags = await Promise.all(tagsResponses.map(response => response.json()));
+        const tags = (await Promise.all(tagsObj.map((t) => axios.post(`/content-gen/tags/`, {
+          name: t
+        })))).map((res) => res.data);
 
         let sks = skillsObj;
 
@@ -48,23 +44,14 @@ function LayoutMain(props: any) {
 
           skill.tags = skill.tags?.split(',').filter((t) => t !== '' || t !== ' ').map((t) => tags.find((tg) => tg.name === t)?._id).filter((t) => !!t);
 
-          console.log(skill.tags);
-
           return skill;
         });
 
-        const skillsPromises = sks.map((s) => fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/content-gen/skills/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(s),
-        }));
+        const skillsPromises = sks.map((s) => axios.post(`/content-gen/skills/`, s));
 
         const skillsResponses = await Promise.all(skillsPromises);
-        const results = await Promise.all(skillsResponses.map(response => response.json()));
 
-        console.log({ results, skillsObj });
+        console.log({ skillsResponses, skillsObj });
       } catch (error) {
         console.error(error);
       }
@@ -72,16 +59,31 @@ function LayoutMain(props: any) {
 
     async function fetchSkills() {
       try {
-        const data = await getSkills()
-        console.log(data)
-        if (data?.length)
-          _setSkills(data);
+        const data = await getSkills({
+          page: 1,
+          page_size: 100,
+        })
+        if (data?.data?.length)
+          _setSkills(data?.data);
       } catch (error) {
         console.error(error);
       }
     }
 
+    async function fetchUser() {
+      try {
+        const data = await me()
+        if (data)
+          setUser(data)
+        else
+          throw new Error("User not found or not logged in")
+      } catch (error: any) {
+        toast(error.message)
+      }
+    }
+
     fetchSkills()
+    fetchUser()
   }, [])
 
   useEffect(() => {

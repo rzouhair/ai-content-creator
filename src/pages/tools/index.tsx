@@ -29,7 +29,7 @@ function Tools() {
 
   useEffect(() => {
     if (!selectedTag)
-      setSelectedTag(tags?.[0].value)
+      setSelectedTag(tags?.[0]?.value)
     else
       setSelectedTag(selectedTag)
   }, [tags, selectedTag])

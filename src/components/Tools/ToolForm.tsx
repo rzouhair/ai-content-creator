@@ -2,11 +2,14 @@ import { Button } from '@/components/ui/button';
 import AppNumberInput from '@/components/App/AppNumberInput'
 import AppInput from '@/components/App/AppInput'
 import AppTextarea from '@/components/App/AppTextArea'
-import { InputSchema } from '@/lib/@types'
+import { InputSchema, MEMORY_STATUS_TYPES } from '@/lib/@types'
 import { Skill } from '@/lib/@types'
 import Image from 'next/image'
 import React, { useCallback, useEffect, useState } from 'react'
 import { executeSkill } from '@/api/skills'
+import AppListbox from '../App/AppListbox';
+import { getMemories as getMemoriesList } from '@/api/memories';
+import { toast } from 'sonner';
 
 function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; className?: string; onDataGenerated?: (data: any) => any }) {
 
@@ -14,6 +17,9 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
 
   const [numOfOutputs, setNumOfOutputs] = useState<number>(1)
   const [language, setLanguage] = useState('English')
+  
+  const [selectedMemory, setMemory] = useState<string | null>(null)
+  const [memories, setMemories] = useState<{ label: string; value: string; }[]>([])
 
   const [icon, setIcon] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -25,6 +31,23 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
     })
     setValue(obj)
   }, [skill])
+
+  useEffect(() => {
+    getMemories()
+  }, [])
+
+  async function getMemories() {
+    try {
+      const lists = await getMemoriesList()
+      if (lists)
+        setMemories(lists.filter(l => l.status === MEMORY_STATUS_TYPES.PROCESSED).map((l) => ({
+          label: l.name,
+          value: l._id
+        })))
+    } catch (error: any) {
+      toast(error.message)
+    }
+  }
 
 
   useEffect(() => {
@@ -57,7 +80,10 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
         inputs: {
           ...value,
           num_outputs: numOfOutputs,
-        }
+        },
+        ...(selectedMemory ? {
+          memory: selectedMemory
+        } : {})
       })
     
       onDataGenerated?.(data)
@@ -130,6 +156,17 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
                 label='Number of outputs'
                 onChange={(e) => {
                   setNumOfOutputs(e)
+                }}
+              />
+            </div>
+
+            <div className='mt-4'>
+              <AppListbox
+                value={selectedMemory as string}
+                label='Memory (optional)'
+                options={memories}
+                onChange={(e: string) => {
+                  setMemory(e)
                 }}
               />
             </div>

@@ -12,7 +12,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { useAtom } from 'jotai';
-import { activeProject as _activeProject } from '@/stores/projects'
+import { activeProject as _activeProject } from '@/stores/app'
 
 function Idea(props: { 
   keyword: string;

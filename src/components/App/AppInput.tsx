@@ -1,9 +1,31 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 // @ts-ignore
 import { debounce } from 'lodash-es'
-import { Input } from '../ui/input';
+import { Input, InputProps } from '../ui/input';
 
-const AppNumberInput = ({
+interface InputFileType extends InputProps {
+  label?: string;
+  placeholder?: string;
+  maxLength?: number;
+  validation?: RegExp;
+  errorMessage?: string;
+  autocomplete?: string;
+  wrapperClassName?: string;
+  hintClassName?: string;
+  type?: string;
+  onChange: (e: any) => void
+  className?: string;
+  hint?: string,
+  color?: string;
+  id?: string;
+  prefix?: any;
+  suffix?: JSX.Element;
+  invalid?: boolean;
+  debounced?: boolean
+  debounceTime?: number
+}
+
+const AppInput = ({
   label,
   placeholder,
   maxLength,
@@ -11,7 +33,7 @@ const AppNumberInput = ({
   errorMessage,
   autocomplete,
   type = 'text',
-  color = 'indigo',
+  color = 'secondary',
   value,
   onChange,
   className,
@@ -24,28 +46,7 @@ const AppNumberInput = ({
   debounceTime = 500,
   debounced = false,
   ...rest
-}: {
-  label?: string;
-  placeholder?: string;
-  maxLength?: number;
-  validation?: RegExp;
-  errorMessage?: string;
-  autocomplete?: string;
-  wrapperClassName?: string;
-  hintClassName?: string;
-  type?: string;
-  value: string;
-  onChange: (e: any) => void
-  className?: string;
-  hint?: string,
-  color?: string;
-  id?: string;
-  prefix?: JSX.Element;
-  suffix?: JSX.Element;
-  invalid?: boolean;
-  debounced?: boolean
-  debounceTime?: number
-}) => {
+}: InputFileType) => {
 
   const [focused, setFocused] = useState(false)
 
@@ -60,12 +61,12 @@ const AppNumberInput = ({
   const handleChange = (event: any) => {
     const newValue = event.target.value;
     if (maxLength && newValue.length > maxLength) return;
-    onChange(event);
+    onChange?.(event);
   };
 
   const handleBlur = () => {
     setFocused(false)
-    if (validation && !validation.test(value)) {
+    if (validation && !validation.test(value as string)) {
       alert(errorMessage);
     }
   }
@@ -79,15 +80,15 @@ const AppNumberInput = ({
 
   return (
     <div>
-      <label htmlFor={rest.id} className="text-base font-semibold">{label}</label>
-      <div className={`${wrapperClassName || ''} dark:text-white mt-1.5 flex flex-row items-center h-10 transition-all bg-white dark:bg-night-500 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `!shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color}-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}`}>
+      <label htmlFor={rest.id} className="text-base font-semibold text-text">{label}</label>
+      <div className={`${wrapperClassName || ''} dark:text-white mt-1.5 flex flex-row items-center h-10 transition-all bg-white dark:bg-night-500 border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `!shadow-${color}/50`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `border-${color} focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}`}>
         {
           prefix && <div className="pl-2 flex items-center">
             {prefix}
           </div>
         }
         <Input
-          type={type === 'password' ? 'password' : 'text'}
+          type={type}
           ref={inputRef}
           placeholder={placeholder}
           maxLength={maxLength}
@@ -112,4 +113,4 @@ const AppNumberInput = ({
   );
 };
 
-export default AppNumberInput;
+export default AppInput;

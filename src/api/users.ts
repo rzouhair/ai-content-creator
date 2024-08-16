@@ -1,4 +1,4 @@
-import { User } from "@/lib/@types";
+import { PaginatedResponse, PaginationInfo, User } from "@/lib/@types";
 import axiosInstance from "@/lib/axios";
 
 interface RefreshToken {
@@ -16,6 +16,15 @@ export interface SignupPayload extends Omit<User, '_id' | 'is_active' | 'created
 export interface LoginPayload {
   email: string;
   password: string
+}
+
+export const me = async (): Promise<User | undefined> => {
+  try {
+    const data = await axiosInstance.get(`/me/`);
+    return data.data;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export const login = async (payload: LoginPayload): Promise<AuthResponse | undefined> => {
@@ -54,10 +63,12 @@ export const signup = async (payload: SignupPayload): Promise<AuthResponse | und
   }
 }
 
-export const getUsers = async (): Promise<User[] | undefined> => {
+export const getUsers = async (params?: Record<string, any>): Promise<PaginatedResponse<User[]> | undefined> => {
   try {
-    const data = await axiosInstance.get(`/users/`);
-    return data.data;
+    const res = await axiosInstance.get(`/users/`, {
+      params: params || {}
+    });
+    return res.data;
   } catch (error) {
     console.error(error);
   }
@@ -86,7 +97,7 @@ export const createUser = async (payload: any) => {
 
 export const updateUser = async (id: string, payload: any) => {
   try {
-    const res = await axiosInstance.post(`/users/${id}/`, payload);
+    const res = await axiosInstance.put(`/users/${id}/`, payload);
     if (res.status !== 200) {
       // Handle non-2xx responses, e.g., by throwing an error or returning a default value.
       throw new Error(`Request failed with status ${res.status}`);

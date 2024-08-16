@@ -16,10 +16,15 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { EyeOff, Eye } from "lucide-react"
 
+import { loggedInUser, setUsersAtom } from '@/stores/app'
+import { useAtom, useSetAtom } from "jotai"
+
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 interface Inputs extends LoginPayload {}
 
 export default function LoginPage({ className, ...props }: UserAuthFormProps) {
+
+  const setUser = useSetAtom(loggedInUser)
 
   const [isPasswordShown, setPasswordShown] = React.useState<boolean>(false)
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
@@ -44,6 +49,7 @@ export default function LoginPage({ className, ...props }: UserAuthFormProps) {
       }
       localStorage.setItem('rb_access_token', loginRes.token)
       localStorage.setItem('rb_refresh_token', loginRes.refresh)
+      setUser(loginRes.user)
       toast("Login Successful")
       await router.push('/')
     } catch (error: any) {

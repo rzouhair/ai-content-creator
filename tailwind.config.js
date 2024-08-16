@@ -24,6 +24,9 @@ module.exports = {
       },
     },
     extend: {
+      boxShadow: {
+        innerhard: 'inset 0 0 0 2px rgba(0, 0, 0, 1)'
+      },
       colors: {
         text: 'var(--text)',
         night: {

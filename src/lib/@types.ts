@@ -1,11 +1,8 @@
 export interface Keywords {
   _id: string;
   title?: string;
-  suggestion?: string | null
-  saved_cluster?: {
-    keywords: string[];
-    parent_keyword: string
-  }[] | null
+  suggestions?: Suggestion[] | null
+  saved_cluster?: Cluster[] | null
   embeddings: {
     keyword: string
     embedding: number[]
@@ -18,6 +15,9 @@ export interface Suggestion {
   parent_keyword: string;
   search_query: string;
   status: 'CREATED' | 'IN_PROGRESS' | 'ANALYZED';
+  metadata: {
+    modifier?: string
+  }
   created_at: string;
 }
 
@@ -62,6 +62,7 @@ export interface Skill {
   emoji: string;
   tags: Tag[];
   input_schema: InputSchema[];
+  examples?: string;
   created_at: string;
   updated_at: string;
 }
@@ -88,14 +89,37 @@ export interface Project {
 }
 
 export interface User {
-  _id: string;
+  id: string;
   first_name: string;
   last_name: string;
   username: string;
-  password: string;
   email: string;
+  groups: (number | string)[]
   is_admin: boolean;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export enum MEMORY_TYPES {
+  TEXT= "TEXT",
+  YTB= "YTB",
+  FILE= "FILE",
+}
+
+export enum MEMORY_STATUS_TYPES {
+  CREATED = "CREATED",
+  PROCESSING = "PROCESSING",
+  PROCESSED = "PROCESSED",
+  ERROR = "ERROR"
+}
+export interface Memory {
+  _id: string;
+  name: string;
+  type: MEMORY_TYPES;
+  status: MEMORY_STATUS_TYPES;
+  metadata: any
+  user: string;
   created_at: string;
   updated_at: string;
 }
@@ -125,4 +149,9 @@ export interface PaginatedResponse<T> {
   page_count: number;
   items_count: number;
   data: T
+}
+
+export interface Cluster {
+  keywords: string[];
+  parent_keyword: string
 }

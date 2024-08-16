@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 // @ts-ignore
 import { debounce } from 'lodash-es'
+import { Label } from '../ui/label';
 
 const AppNumberInput = ({
   label,
@@ -17,6 +18,7 @@ const AppNumberInput = ({
   className,
   wrapperClassName,
   hintClassName,
+  labelClassName,
   hint,
   prefix,
   suffix,
@@ -38,6 +40,7 @@ const AppNumberInput = ({
   value: number;
   onChange: (e: any) => void
   className?: string;
+  labelClassName?: string;
   hint?: string,
   color?: string;
   id?: string;
@@ -46,6 +49,8 @@ const AppNumberInput = ({
   invalid?: boolean;
   debounced?: boolean
   debounceTime?: number
+  min?: number,
+  max?: number
 }) => {
   // border-secondary
   // hover:border-secondary
@@ -71,9 +76,13 @@ const AppNumberInput = ({
   };
 
   const increment = () => {
+    if (rest.max && rest.max < value + 1)
+      return
     handleChange(value + 1)
   }
   const decrement = () => {
+    if (rest.min && rest.min > value - 1)
+      return
     handleChange(value - 1)
   }
 
@@ -92,10 +101,10 @@ const AppNumberInput = ({
   }
 
   return (
-    <div>
-      <label htmlFor={rest.id} className="text-base font-semibold dark:text-white">{label}</label>
+    <div className='w-full'>
+      <Label htmlFor={rest.id} className={`text-base font-semibold text-text ${labelClassName}`}>{label}</Label>
       <div className={`flex items-center justify-center w-full bg-white mt-1.5 rounded-md overflow-hidden border shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-ghost_white dark:border-muted hover:border-${color} !shadow-${color}-100`}  transition-all self-stretch ${focused && `border-${color}-300 shadow-[0px_0px_0px_3px_#F2F4F7]`}`}>
-        <div className={`h-10 flex items-center justify-center border-r dark:bg-gray-700 bg-white min-w-[56px] dark:bg-night-200 dark:text-white ${invalid ? `border-r-red-300 !shadow-red-100 hover:border-r-red-300 !text-red-500` : `border-r-muted dark:border-r-muted hover:border-r-${color}-300`} hover:bg-gray-50 transition-colors duration-100 cursor-pointer focus:bg-gray-100`} onClick={(e) => decrement()}>
+        <div className={`h-10 flex items-center justify-center border-r dark:bg-gray-700 bg-white min-w-[56px] dark:bg-night-200 dark:text-white ${invalid ? `border-r-red-300 !shadow-red-100 hover:border-r-red-300 !text-red-500` : `border-r-muted dark:border-r-muted hover:border-r-${color}-300`} hover:bg-gray-50 transition-colors duration-100 cursor-pointer focus:bg-gray-100 ${(rest.min && rest.min > value - 1) && 'pointer-events-none opacity-50 transition-colors'}`} onClick={(e) => decrement()}>
           <i className='i-tabler-minus'></i>
         </div>
         <div className={`${wrapperClassName || ''} flex-[3] box-border flex justify-center text-center flex-row items-center px-2 gap-2 h-10 outline-none dark:bg-night dark:text-white text-sm text-gray-900 font-normal pointer-events-none`}>
@@ -105,6 +114,8 @@ const AppNumberInput = ({
             ref={inputRef}
             placeholder={placeholder}
             maxLength={maxLength}
+            min={rest.min}
+            max={rest.max}
             autoComplete={autocomplete}
             onChange={debounced ? debouncedChangeHandler : handleChange}
             onBlur={handleBlur}
@@ -115,7 +126,7 @@ const AppNumberInput = ({
           />
           {suffix || null}
         </div>
-        <div className={`h-10 flex items-center border-l justify-center bg-white dark:bg-night-200 dark:text-white min-w-[56px] ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-ghost_white dark:border-muted hover:border-${color}-300 !shadow-${color}-100`} hover:bg-gray-50 transition-colors duration-100 cursor-pointer focus:bg-gray-100`} onClick={(e) => increment()}>
+        <div className={`h-10 flex items-center border-l justify-center bg-white dark:bg-night-200 dark:text-white min-w-[56px] ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `border-ghost_white dark:border-muted hover:border-${color}-300 !shadow-${color}-100`} hover:bg-gray-50 transition-colors duration-100 cursor-pointer focus:bg-gray-100 ${(rest.max && rest.max < value + 1) && 'pointer-events-none opacity-50 transition-colors'}`} onClick={(e) => increment()}>
           <i className='i-tabler-plus'></i>
         </div>
       </div>

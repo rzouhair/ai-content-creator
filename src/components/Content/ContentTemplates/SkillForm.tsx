@@ -2,11 +2,14 @@ import { Button } from '@/components/ui/button';
 import AppNumberInput from '@/components/App/AppNumberInput'
 import AppInput from '@/components/App/AppInput'
 import AppTextarea from '@/components/App/AppTextArea'
-import { InputSchema } from '@/lib/@types'
+import { InputSchema, MEMORY_STATUS_TYPES } from '@/lib/@types'
 import { Skill } from '@/lib/@types'
 import Image from 'next/image'
 import React, { useCallback, useEffect, useState } from 'react'
 import { executeSkill } from '@/api/skills'
+import AppListbox from '@/components/App/AppListbox';
+import { toast } from 'sonner';
+import { getMemories as getMemoriesList } from '@/api/memories';
 
 function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; className?: string; onDataGenerated?: (data: any) => any }) {
 
@@ -14,6 +17,9 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
 
   const [numOfOutputs, setNumOfOutputs] = useState<number>(1)
   const [language, setLanguage] = useState('English')
+  
+  const [selectedMemory, setMemory] = useState<string | null>(null)
+  const [memories, setMemories] = useState<{ label: string; value: string; }[]>([])
 
   const [icon, setIcon] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -25,6 +31,23 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
     })
     setValue(obj)
   }, [skill])
+
+  useEffect(() => {
+    getMemories()
+  }, [])
+
+  async function getMemories() {
+    try {
+      const lists = await getMemoriesList()
+      if (lists)
+        setMemories(lists.filter(l => l.status === MEMORY_STATUS_TYPES.PROCESSED).map((l) => ({
+          label: l.name,
+          value: l._id
+        })))
+    } catch (error: any) {
+      toast(error.message)
+    }
+  }
 
 
   useEffect(() => {
@@ -57,6 +80,7 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
         inputs: {
           ...value,
           num_outputs: numOfOutputs,
+          language: language
         }
       })
     
@@ -130,6 +154,27 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
                 label='Number of outputs'
                 onChange={(e) => {
                   setNumOfOutputs(e)
+                }}
+              />
+            </div>
+            <div className='mt-4'>
+              <AppListbox
+                value={selectedMemory as string}
+                label='Memory (optional)'
+                options={[]}
+                onChange={(e: string) => {
+                  setMemory(e)
+                }}
+              />
+            </div>
+            <div className='mt-4'>
+              <AppInput
+                label="Output language"
+                placeholder="English"
+                value={language}
+                required={true}
+                onChange={(e) => {
+                  setLanguage(e.target.value as string)
                 }}
               />
             </div>

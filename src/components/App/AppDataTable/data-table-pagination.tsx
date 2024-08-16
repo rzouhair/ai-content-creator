@@ -35,13 +35,10 @@ export function DataTablePagination<TData>({
   const pageSize = table.getState().pagination.pageSize
 
   React.useEffect(() => {
-    console.log('current Page changed ' + table.getState().pagination.pageIndex + 1)
     onUpdatePage?.(table.getState().pagination.pageIndex + 1)
   }, [table.getState().pagination.pageIndex])
 
   React.useEffect(() => {
-    console.log("Something changed")
-    console.log(pagination)
     if (pagination.page)
       table.setPageIndex(pagination.page - 1)
 
