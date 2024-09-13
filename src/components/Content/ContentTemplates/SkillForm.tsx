@@ -81,7 +81,10 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
           ...value,
           num_outputs: numOfOutputs,
           language: language
-        }
+        },
+        ...(selectedMemory ? {
+          memory: selectedMemory
+        } : {})
       })
     
       onDataGenerated?.(data)
@@ -128,7 +131,7 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
                           setValue(oldForms)
                         }}
                       />
-                    : <AppTextarea
+                    : input.type === 'textarea' ? <AppTextarea
                         key={input.id}
                         id={input.id}
                         placeholder={input.placeholder}
@@ -142,7 +145,19 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
                         }
                       }
                     ></AppTextarea>
-
+                    : input.type === 'list' ? <AppListbox
+                      key={input.id}
+                      id={input.id}
+                      placeholder={input.placeholder}
+                      label={`${input.label || input.id.charAt(0).toUpperCase().concat(input.id.substring(1, input.id.length))} ${input.required ? '*' : ''}`}
+                      options={input.items?.replaceAll('\n', '').split(',').map((i) => ({ label: i, value: i }))}
+                      value={value[input.id]}
+                      onChange={(e: string) => {
+                        const oldForms = {...value}
+                        oldForms[input.id] = e
+                        setValue(oldForms)
+                      }}
+                    /> : null
                   )
                 })
               }
@@ -161,7 +176,7 @@ function SkillForm({ skill, onDataGenerated, className }: { skill: Skill; classN
               <AppListbox
                 value={selectedMemory as string}
                 label='Memory (optional)'
-                options={[]}
+                options={memories}
                 onChange={(e: string) => {
                   setMemory(e)
                 }}

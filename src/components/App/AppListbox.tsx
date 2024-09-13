@@ -24,18 +24,22 @@ export default function AppListbox(props: ListBoxProps) {
   const [selectedLabel, setSelectedLabel] = useState(props.options?.find((o) => o.value === selected)?.label)
 
   useEffect(() => {
-    props.onChange?.(selected)
-    setSelectedLabel(props.options?.find((o) => o.value === selected)?.label)
-  }, [selected, props])
-
-  useEffect(() => {
     setSelected(props.value || '')
   }, [props])
+
+  function onValueChange (value: string) {
+    if (!value?.length)
+      return
+
+    setSelected(value)
+    props.onChange?.(value)
+    setSelectedLabel(props.options?.find((o) => o.value === value)?.label)
+  }
 
   return (
     <div className="flex gap-2 w-full flex-col">
       { props.label && <label className="text-base font-semibold">{props.label}</label> }
-      <Select {...props} onValueChange={setSelected} defaultValue={selected} disabled={props.disabled}>
+      <Select {...props} onValueChange={onValueChange} defaultValue={selected} disabled={props.disabled}>
         <SelectTrigger className='outline-none ring-transparent focus:ring-1 focus:ring-secondary focus:ring-offset-0'>
           <SelectValue className='outline-none ring-transparent focus:ring-1 focus:ring-secondary focus:ring-offset-0' placeholder={selectedLabel} />
         </SelectTrigger>

@@ -83,6 +83,15 @@ export const deleteSkill = async (id: string): Promise<void | undefined> => {
   }
 };
 
+export const getTags = async (): Promise<any | undefined> => {
+  try {
+    const res = await axios.get(`/content-gen/tags/`);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const getSkillPrompt = async (skillId: string): Promise<{ prompt: string; skill: string, _id: string } | undefined> => {
   try {
     const res = await axios.get(`/content-gen/skills/${skillId}/prompt/`);

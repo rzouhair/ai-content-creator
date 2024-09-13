@@ -41,6 +41,7 @@ function AppNav(props: { navCollapsed?: boolean }) {
       { to: "/ideation", icon: "i-tabler-bulb", title: "Ideation" },
       { to: "/memories", icon: "i-tabler-brain", title: "Memories" },
       { to: "/tools", icon: "i-tabler-tools", title: "Tools" },
+      { to: "/flow", icon: "i-tabler-article", title: "Post generation" },
       /* { to: "/chat", icon: "i-tabler-message", title: "Chat" }, */
     ],
     bottom: [

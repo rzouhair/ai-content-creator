@@ -2,6 +2,7 @@ import 'regenerator-runtime/runtime';
 import '@/styles/globals.css'
 import '@/styles/reset.css'
 import '@/styles/normalize.css'
+
 import type { AppProps } from 'next/app'
 import { Provider as JotaiProvider } from 'jotai'
 import { Toaster } from "@/components/ui/sonner"

@@ -80,6 +80,7 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
         inputs: {
           ...value,
           num_outputs: numOfOutputs,
+          language: language
         },
         ...(selectedMemory ? {
           memory: selectedMemory
@@ -130,7 +131,7 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
                           setValue(oldForms)
                         }}
                       />
-                    : <AppTextarea
+                    : input.type === 'textarea' ? <AppTextarea
                         key={input.id}
                         id={input.id}
                         placeholder={input.placeholder}
@@ -144,6 +145,19 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
                         }
                       }
                     ></AppTextarea>
+                    : input.type === 'list' ? <AppListbox
+                      key={input.id}
+                      id={input.id}
+                      placeholder={input.placeholder}
+                      label={`${input.label || input.id.charAt(0).toUpperCase().concat(input.id.substring(1, input.id.length))} ${input.required ? '*' : ''}`}
+                      options={input.items?.replaceAll('\n', '').split(',').map((i) => ({ label: i, value: i }))}
+                      value={value[input.id]}
+                      onChange={(e: string) => {
+                        const oldForms = {...value}
+                        oldForms[input.id] = e
+                        setValue(oldForms)
+                      }}
+                    /> : null
 
                   )
                 })
@@ -167,6 +181,18 @@ function ToolForm({ skill, onDataGenerated, className }: { skill: Skill; classNa
                 options={memories}
                 onChange={(e: string) => {
                   setMemory(e)
+                }}
+              />
+            </div>
+
+            <div className='mt-4'>
+              <AppInput
+                label="Output language"
+                placeholder="English"
+                value={language}
+                required={true}
+                onChange={(e) => {
+                  setLanguage(e.target.value as string)
                 }}
               />
             </div>

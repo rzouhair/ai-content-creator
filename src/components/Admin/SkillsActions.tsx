@@ -11,8 +11,8 @@ import * as yup from "yup"
 import { ObjectSchema } from "yup"
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { InputSchema, Skill } from '@/lib/@types'
-import { createSkill, generateSkillPrompt, getSkillPrompt, setSkillPrompt, updateSkill } from '@/api/skills'
+import { InputSchema, Skill, Tag } from '@/lib/@types'
+import { createSkill, generateSkillPrompt, getSkillPrompt, getTags, setSkillPrompt, updateSkill } from '@/api/skills'
 import {
   Tabs,
   TabsContent,
@@ -26,11 +26,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Checkbox } from '../ui/checkbox'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import AppListbox from '../App/AppListbox'
 import { Textarea } from '../ui/textarea'
+import { Badge } from '../ui/badge'
 
 interface Inputs extends Skill {
+
 }
 
 const schema: ObjectSchema<Inputs> = yup
@@ -59,9 +61,14 @@ function SkillsAction(props: any) {
   const [prompt, setPrompt] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
 
+  const [tags, setTags] = useState<any>([])
+  const [newlyAddedTag, setNewlyAddedTag] = useState<string>('')
+  const [skillTags, setSkillTags] = useState<any[]>([])
+
   const inputTypes = [
     { label: 'Text Input', value: 'text' },
     { label: 'Textarea', value: 'textarea' },
+    { label: 'List', value: 'list' },
   ]
 
   async function onSubmit(data: Inputs) {
@@ -70,20 +77,24 @@ function SkillsAction(props: any) {
       let created
       setLoading(true)
       if (props.mode === 'create') {
-        created = await createSkill(data)
+        created = await createSkill({
+          ...data,
+          tags: data.tags?.map((t) => t._id)
+        })
         toast("Skill created successfully!")
       } else if (values._id) {
-        await updateSkill(values._id, {
-          ...values,
-          tags: values.tags.map((t) => t._id)
-        })
+        await Promise.all([
+          updateSkill(values._id, {
+            ...values,
+            tags: values.tags?.filter((t) => !!t).map((t) => t._id)
+          }),
+          setSkillPrompt(values._id, {
+            prompt
+          })
+        ])
         toast("Skill updated successfully!")
       }
       if (values?._id || created?._id) {
-        console.log({
-          created: created?._id,
-          values: values._id
-        })
         await setSkillPrompt(created?._id || values._id, {
           prompt,
         })
@@ -102,7 +113,7 @@ function SkillsAction(props: any) {
       {
         id: "",
         type: "text",
-        label: "Untitled " + getValues().input_schema.length,
+        label: "Untitled " + (getValues()?.input_schema?.length || 0),
         default: "",
         required: false,
         placeholder: ""
@@ -112,6 +123,13 @@ function SkillsAction(props: any) {
 
   useEffect(() => {
     const values = getValues()
+    async function retrieveTags() {
+      const tags = await getTags()
+      setTags(tags?.map((t: Tag) => ({
+        label: t.name,
+        value: t._id
+      })))
+    }
     async function retrievePrompt() {
       try {
         const skillPrompt = await getSkillPrompt(values._id)
@@ -120,9 +138,14 @@ function SkillsAction(props: any) {
         toast("An error occurred: " + error.message)
       }
     }
+
+    if (!tags?.length) {
+      retrieveTags()
+    }
+
     if (props.mode === 'edit')
       retrievePrompt()
-  }, [props])
+  }, [])
 
   useEffect(() => {
     const values = getValues()
@@ -131,6 +154,15 @@ function SkillsAction(props: any) {
       setValue(key, props.mode === 'edit' ? props.payload?.[key] : '')
     })
   }, [props, getValues, setValue])
+
+  useEffect(() => {
+    if (props.open && props.payload?.tags) {
+      console.log({
+        tags: props.payload.tags
+      })
+      setSkillTags(props.payload.tags)
+    }
+  }, [props.open])
 
   async function getPrompt() {
     try {
@@ -144,7 +176,7 @@ function SkillsAction(props: any) {
 
   return (
     <ModalBase
-      title={`${props.mode === 'create' ? 'Create' : 'Edit'} User`}
+      title={`${props.mode === 'create' ? 'Create' : 'Edit'} Skill`}
       open={props.open}
       trigger={props.trigger}
       onClose={props.onClose}
@@ -184,6 +216,55 @@ function SkillsAction(props: any) {
                   disabled={loading}
                 />
                 <p className="text-sm text-destructive m-0">{errors.description?.message}</p>
+              </div>
+
+              <div className="grid gap-1">
+                <Label>
+                  Tags*
+                </Label>
+                <div className='flex items-center flex-wrap gap-2'>
+                {skillTags?.map?.((tag) => (
+                  <Badge key={tag._id}>
+                    {tag.name}
+                    <button onClick={(e) => {
+                      e.preventDefault()
+                      const newList = skillTags?.filter((t) => t._id !== tag._id)
+                      setValue(`tags`, newList)
+                      setSkillTags(newList)
+                    }}>
+                      <X className='w-4 h-4 text-white' />
+                    </button>
+                  </Badge>
+                ))}
+                </div>
+                <AppListbox
+                  value={newlyAddedTag}
+                  options={tags}
+                  onChange={(selected: string) => {
+                    console.log({
+                      selected,
+                      skillTags
+                    })
+                    if (selected === '')
+                        return
+                    /* if (newlyAddedTag !== selected) {
+                      setNewlyAddedTag(selected)
+                    } */
+                    if (skillTags?.find((t) => t._id === selected)) {
+                      const newList = skillTags?.filter((t) => t._id !== selected)
+                      setValue(`tags`, newList)
+                      setSkillTags(newList)
+                    } else {
+                      const newTag = tags.find((t) => t.value === selected)
+                      if (newTag) {
+                        const newList = [...(skillTags || []), { _id: newTag.value, name: newTag.label }]
+                        setValue(`tags`, newList)
+                        setSkillTags(newList)
+                      }
+                    }
+                  }}
+                  disabled={loading}
+                />
               </div>
 
               <p className="-mt-2 text-sm text-muted-foreground">
@@ -227,6 +308,16 @@ function SkillsAction(props: any) {
                           disabled={loading}
                         />
                       </div>
+                      {getValues()?.input_schema?.[index]?.type === 'list' && <div className="grid gap-1">
+                        <Label>
+                          List items* (comma separated)
+                        </Label>
+                        <Textarea
+                          value={getValues().input_schema?.[index]?.items}
+                          {...register(`input_schema.${index}.items`)}
+                          disabled={loading}
+                        />
+                      </div>}
                       <div className='grid gap-2 grid-cols-2'>
                         <div className="grid gap-1">
                           <Label>
@@ -276,7 +367,9 @@ function SkillsAction(props: any) {
                 id="examples"
                 autoCapitalize="none"
                 autoCorrect="off"
-                {...register('examples')}
+                {...register('examples', {
+                  value: getValues('examples') || 'No examples given',
+                })}
                 disabled={loading}
               />
             </div>

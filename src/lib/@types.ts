@@ -47,6 +47,7 @@ export interface InputSchema {
   id: string;
   type: string;
   label: string;
+  items?: string;
   required: boolean;
   default?: string
   placeholder: string;

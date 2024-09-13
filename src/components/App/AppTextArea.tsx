@@ -103,7 +103,7 @@ const AppTextarea = ({
   return (
     <div className={`${className}`}>
       <label htmlFor={rest.id} className="text-base font-semibold dark:text-white">{label}</label>
-      <div className={`${wrapperClassName || ''} max-h-[300px] overflow-auto dark:text-white mt-1.5 flex flex-row items-center transition-all bg-white dark:bg-night-500 border border-ghost_white dark:border-muted shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `!shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `!border-secondary focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2`}`}>
+      <div className={`${wrapperClassName || ''} max-h-[300px] overflow-auto dark:text-white mt-1.5 flex flex-row items-start transition-all bg-white dark:bg-night-500 border border-ghost_white dark:border-muted shadow-xs ${invalid ? `border-red-300 !shadow-red-100 hover:border-red-300 !text-red-500` : `!shadow-${color}-100`} rounded-md flex-none order-1 self-stretch outline-none text-gray-900 font-normal ${focused && `!border-secondary focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2`}`}>
         {prefix || null}
         <Textarea
           placeholder={placeholder}

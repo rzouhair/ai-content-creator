@@ -171,12 +171,12 @@ export default function Skills() {
             <Button onClick={() => openSkillsActionModal("create")}>Create Skill</Button>
           }
         />
-        <SkillsAction
+        {actionModal.open && <SkillsAction
           open={actionModal.open}
           onClose={() => closeActionsModal()}
           mode={actionModal.mode}
           payload={actionModal.payload}
-        />
+        />}
       </div>
     </div>
   )
