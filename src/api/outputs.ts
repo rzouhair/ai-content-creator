@@ -72,6 +72,42 @@ export const extractTranscript = async (payload: {
   }
 };
 
+export const humanizeText = async (payload: {
+  content: string,
+}) => {
+  try {
+    const res = await axios.post(`${rawApiUrl}/humanize/`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data.output;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const generateImages = async (payload: {
+  prompt: string,
+  options: {
+    model: 'V_1' | 'V_2',
+    aspect_ratio: 'ASPECT_1_1' | 'ASPECT_4_3' | 'ASPECT_16_9' | 'ASPECT_9_16',
+    magic_prompt_option: 'ON' | 'OFF' | 'AUTO'
+  },
+  number_of_images: number
+}) => {
+  try {
+    const res = await axios.post(`${rawApiUrl}/generate_image/`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data.images;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const extractTranscriptInfo = async (payload: {
   transcript: string
 }) => {

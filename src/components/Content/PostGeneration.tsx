@@ -19,6 +19,9 @@ import { toast, Toaster } from 'sonner';
 import { writeBlogPost, writeToWordpress } from '@/api/writer';
 import OutlineEditor from './OutlineEditor';
 import { CheckCircle, CheckIcon, Loader2 } from 'lucide-react';
+import { randomUUID } from 'crypto';
+import AppButton from '../App/AppButton';
+import { generateImages } from '@/api/outputs';
 
 export default function Form() {
   const articleTypeOptions = [
@@ -157,7 +160,7 @@ export default function Form() {
           outline
         })
 
-        setFinalPost((prev) => ({...prev, title: title.title, featuredImagePrompt: title.prompt}))
+        setFinalPost((prev) => ({...prev, title: title.title, featuredImagePrompt: title.prompt, images: title.images}))
         console.log({
           outline
         })
@@ -239,7 +242,7 @@ export default function Form() {
     try {
       setIsLoading(true)
       const markdownContent = finalPost.sections?.map((section) => {
-        return `## ${section['h2'].heading}\n\n${section['h2'].paragraph}\n\n${section?.h3?.length ? section['h3']?.map((h3) => `### ${h3.heading}\n\n${h3.paragraph}\n\n`).join('\n\n') : ''}`
+        return `## ${section?.['h2']?.heading}\n\n${section?.['h2']?.paragraph}\n\n${section?.h3?.length ? section['h3']?.map((h3) => `### ${h3.heading}\n\n${h3.paragraph}\n\n`).join('\n\n') : ''}`
       }).join('\n\n')
 
       console.log({
@@ -252,6 +255,24 @@ export default function Form() {
       console.error(error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  async function generateImage (prompt, ind, aspect_ratio = 'ASPECT_9_16') {
+    try {
+      const image = await generateImages({
+        prompt,
+        options: {
+          model: 'V_2',
+          aspect_ratio,
+          magic_prompt_option: 'OFF'
+        },
+        number_of_images: 1
+      })
+      const postImages = finalPost.images
+      setFinalPost((prev) => ({...prev, images: [...postImages, image]}))
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -478,10 +499,10 @@ export default function Form() {
             <h1>{finalPost.title}</h1>
             {finalPost.sections?.map((section, index) => (
               <div key={index}>
-                <h2>{section['h2'].heading}</h2>
-                {section['h2'].paragraph && <p className='whitespace-pre-line'>{section['h2'].paragraph}</p>}
+                <h2>{section?.['h2']?.heading}</h2>
+                {section?.['h2']?.paragraph && <p className='whitespace-pre-line'>{section['h2'].paragraph}</p>}
 
-                {section['h3']?.map((h3, cIndex) => (
+                {section?.['h3']?.map((h3, cIndex) => (
                   <div key={cIndex}>
                     <h3>{h3.heading}</h3>
                     {h3.paragraph && <p className='whitespace-pre-line'>{h3.paragraph}</p>}
@@ -496,6 +517,13 @@ export default function Form() {
 
             <p className='text-lg font-bold text-primary'>Prompts</p>
 
+            <div className='grid grid-cols-2 gap-4'>
+              {finalPost.images?.length && finalPost.images?.map((i: string, key: number) => (<a key={key} href={i} download={`Featured-${key}.png`} target='_blank'>
+                <span className='font-bold text-center'>Click to download</span>
+                <img src={i} alt='' className='w-full h-auto object-cover rounded-sm' />
+              </a>))}
+            </div>
+
             {finalPost.featuredImagePrompt && <div>
               <div className='p-4 rounded-sm bg-slate-200 mt-4'>
                 <p className='font-semibold m-0'>Featured Image Prompt:</p>
@@ -505,12 +533,22 @@ export default function Form() {
               </div>
             </div>}
 
-            {finalPost.sections?.filter((section) => !!section['h2'].prompt).map((section, key) => {
-              return <div key={key} className='p-4 rounded-sm bg-slate-200 mt-4'>
-                <p className='font-semibold m-0'>Prompt for {section['h2'].heading}:</p>
-                <pre className='mt-4 mb-0 whitespace-pre-line'>
-                  {section['h2'].prompt}
-                </pre>
+            {finalPost.sections?.filter((section) => !!section?.['h2']?.prompt).map((section, key) => {
+              return <div key={key}>
+                <div className='p-4 rounded-sm bg-slate-200 mt-4'>
+                  <p className='font-semibold m-0'>Prompt for {section?.['h2']?.heading}:</p>
+                  <pre className='mt-4 mb-0 whitespace-pre-line'>
+                    {section?.['h2']?.prompt}
+                  </pre>
+                  <AppButton className='mx-auto mt-4' onClick={() => generateImage(section?.['h2']?.prompt, key)}>Generate Image</AppButton>
+                </div>
+
+                {section['h2']?.images?.length && section['h2']?.images?.map((i: string, imKey: number) => (<div key={imKey}>
+                  <a href={i} download={`Section-${key}-${imKey}.png`} target='_blank'>
+                    <span className='font-bold text-center'>Click to download</span>
+                    <img src={i} alt='' className='w-full h-auto object-cover rounded-sm' />
+                  </a>
+                </div>))}
               </div>
             })}
           </section>
